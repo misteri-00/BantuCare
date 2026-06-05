@@ -150,17 +150,18 @@ def main():
         cols = st.columns(3)
         for idx, evt in enumerate(events):
             with cols[idx]:
-                st.markdown(f"""
-                <div class="event-card">
-                    <div class="event-icon">{evt['icon']}</div>
-                    <div class="event-title">{evt['title']}</div>
-                    <div class="event-desc">{evt['desc']}</div>
-                    <div class="event-meta">Tanggal: {evt['date']}</div>
-                    <div class="event-meta">Lokasi: {evt['location']}</div>
-                    <div class="event-meta">Kuota: <span style="color:#f59e0b; font-weight:bold;">{evt['kuota']}</span></div>
-                </div>
-                <br>
-                """, unsafe_allow_html=True)
+                html_card = f"""
+<div class="event-card">
+<div class="event-icon">{evt['icon']}</div>
+<div class="event-title">{evt['title']}</div>
+<div class="event-desc">{evt['desc']}</div>
+<div class="event-meta">Tanggal: {evt['date']}</div>
+<div class="event-meta">Lokasi: {evt['location']}</div>
+<div class="event-meta">Kuota: <span style="color:#f59e0b; font-weight:bold;">{evt['kuota']}</span></div>
+</div>
+<br>
+"""
+                st.markdown(html_card, unsafe_allow_html=True)
 
                 if st.button("Ikut Kegiatan Ini", key=evt['id'], use_container_width=True):
                     register_event_dialog(evt['title'])

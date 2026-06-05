@@ -226,27 +226,27 @@ def main():
         progress = calc_progress(prog["dana_terkumpul"], prog["target_dana"])
         
         with col:
-            st.markdown(f"""
-            <div class="program-card">
-                <div class="program-img-wrapper">
-                    <img src="{img_b64}" alt="{prog['judul']}" />
-                    <span class="program-badge">{prog['kategori']}</span>
-                </div>
-                <div class="program-card-body">
-                    <div class="program-title">{prog['judul']}</div>
-                    <div class="program-desc">{prog['deskripsi']}</div>
-                    
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: {progress}%;"></div>
-                    </div>
-                    <div class="progress-stats">
-                        <span class="terkumpul">{format_rupiah(prog['dana_terkumpul'])}</span>
-                        <span>{format_rupiah(prog['target_dana'])}</span>
-                    </div>
-                </div>
-            </div>
-            <br>
-            """, unsafe_allow_html=True)
+            html_card = f"""
+<div class="program-card">
+<div class="program-img-wrapper">
+<img src="{img_b64}" alt="{prog['judul']}" />
+<span class="program-badge">{prog['kategori']}</span>
+</div>
+<div class="program-card-body">
+<div class="program-title">{prog['judul']}</div>
+<div class="program-desc">{prog['deskripsi']}</div>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill" style="width: {progress}%;"></div>
+</div>
+<div class="progress-stats">
+<span class="terkumpul">{format_rupiah(prog['dana_terkumpul'])}</span>
+<span>{format_rupiah(prog['target_dana'])}</span>
+</div>
+</div>
+</div>
+<br>
+"""
+            st.markdown(html_card, unsafe_allow_html=True)
             
             if st.button("Lihat Detail & Donasi", key=f"btn_detail_{prog['id']}", use_container_width=True):
                 st.session_state['selected_campaign_id'] = prog['id']

@@ -589,23 +589,24 @@ def render_popular_programs():
                 img_b64 = img_to_base64(img_path)
                 progress = calc_progress(prog['dana_terkumpul'], prog['target_dana'])
                 badge_cls = badge_class_map.get(prog['kategori'], 'badge-food')
-                st.markdown(f"""
-                <div class="program-card animate-in delay-{i+1}">
-                    <img src="{img_b64}" alt="{prog['judul']}" />
-                    <div class="program-card-body">
-                        <span class="program-badge {badge_cls}">{prog['kategori']}</span>
-                        <h3>{prog['judul']}</h3>
-                        <p>{prog['deskripsi']}</p>
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" style="width:{progress}%"></div>
-                        </div>
-                        <div class="progress-info">
-                            <span>Terkumpul <strong>{format_rupiah(prog['dana_terkumpul'])}</strong></span>
-                            <span>Target {format_rupiah(prog['target_dana'])}</span>
-                        </div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                html_card = f"""
+<div class="program-card animate-in delay-{i+1}">
+<img src="{img_b64}" alt="{prog['judul']}" />
+<div class="program-card-body">
+<span class="program-badge {badge_cls}">{prog['kategori']}</span>
+<h3>{prog['judul']}</h3>
+<p>{prog['deskripsi']}</p>
+<div class="progress-bar-bg">
+<div class="progress-bar-fill" style="width:{progress}%"></div>
+</div>
+<div class="progress-info">
+<span>Terkumpul <strong>{format_rupiah(prog['dana_terkumpul'])}</strong></span>
+<span>Target {format_rupiah(prog['target_dana'])}</span>
+</div>
+</div>
+</div>
+"""
+                st.markdown(html_card, unsafe_allow_html=True)
     else:
         st.info("Belum ada program kampanye di database.")
 
