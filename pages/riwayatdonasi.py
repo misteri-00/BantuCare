@@ -5,151 +5,258 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from utils.helpers import format_rupiah, get_all_donations
 
 # ═══════════════════════════════════════════════════════════════════════
-# DonasiCare – RIWAYAT DONASI PAGE
-# Connected to SQLite: Menampilkan transaksi dari tabel donations
+# DonasiCare – RIWAYAT DONASI · Forest Luxury Theme
 # ═══════════════════════════════════════════════════════════════════════
 
-def inject_custom_css():
+def inject_css():
     st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    * { font-family: 'Inter', sans-serif !important; }
-    .stApp { background: linear-gradient(135deg, #0a0f1c 0%, #121a2e 50%, #0d1520 100%); }
-    header[data-testid="stHeader"] { background: transparent !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body, [class*="css"], * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
-    .page-header {
-        text-align: center;
-        margin: 1rem 0 3rem 0;
-        animation: fadeIn 0.8s ease;
-    }
-    .page-header h1 { color: #f1f5f9; font-size: 2.8rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .page-header h1 span { background: linear-gradient(135deg, #f7c737, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .page-header p { color: #94a3b8; font-size: 1.1rem; }
+.stApp {
+    background: linear-gradient(160deg, #111c11 0%, #0a140a 55%, #101a10 100%) !important;
+    min-height: 100vh;
+}
+header[data-testid="stHeader"] { background: transparent !important; }
+#MainMenu, footer, .stDeployButton { display: none !important; visibility: hidden !important; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #2d4a2d; border-radius: 4px; }
 
-    .history-card {
-        background: rgba(30, 41, 59, 0.5);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(247, 199, 55, 0.3);
-        border-left: 5px solid #f7c737;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: transform 0.3s ease;
-    }
-    .history-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-    .history-info h4 { color: #f1f5f9; margin: 0 0 0.5rem 0; font-size: 1.1rem; }
-    .history-meta { color: #94a3b8; font-size: 0.85rem; margin: 0; line-height: 1.5; }
-    
-    .history-amount { text-align: right; }
-    .amount-value { font-size: 1.4rem; font-weight: 800; color: #10b981; }
-    .status-badge { 
-        display: inline-block; 
-        background: rgba(16, 185, 129, 0.2); 
-        color: #34d399; 
-        padding: 0.2rem 0.6rem; 
-        border-radius: 20px; 
-        font-size: 0.75rem; 
-        font-weight: 600;
-        margin-top: 0.5rem;
-    }
+/* ── Page Header ── */
+.rd-header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+}
+.rd-header .eyebrow {
+    font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: #c9a84c; display: block; margin-bottom: .4rem;
+}
+.rd-header h1 {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 2.2rem !important; font-weight: 400 !important;
+    color: #f0ede6 !important; line-height: 1.15 !important;
+    margin: 0 0 .4rem !important;
+}
+.rd-header h1 em { font-style: italic; color: #e2c97a; }
+.rd-header p { color: #6a7a60; font-size: .88rem; margin: 0; max-width: 520px; margin: 0 auto; }
 
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: rgba(30, 41, 59, 0.3);
-        border-radius: 16px;
-        border: 1px dashed rgba(255,255,255,0.2);
-    }
-    .empty-state h3 { color: #f1f5f9; }
-    .empty-state p { color: #94a3b8; margin-bottom: 1.5rem; }
+/* ── Page Wrapper ── */
+.rd-page { padding: 0 2rem 3rem; max-width: 1000px; margin: 0 auto; }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+/* ── Summary Stats ── */
+.rd-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.rd-sum-card {
+    background: rgba(15,25,15,.7);
+    border: .5px solid rgba(201,168,76,.15);
+    border-radius: 16px;
+    padding: 1.3rem 1.5rem;
+    text-align: center;
+    transition: all .3s;
+}
+.rd-sum-card:hover { transform: translateY(-3px); border-color: rgba(201,168,76,.3); }
+.rd-sum-icon { font-size: 1.4rem; margin-bottom: .3rem; display: block; }
+.rd-sum-num {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.5rem !important; font-weight: 400 !important;
+    color: #e2c97a !important; margin-bottom: .1rem;
+}
+.rd-sum-label { color: #6a7a60; font-size: .72rem; font-weight: 500; }
+
+/* ── Section Label ── */
+.rd-sec-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: #c9a84c; margin: 1.5rem 0 .8rem;
+}
+
+/* ── Donation Card ── */
+.rd-card {
+    background: rgba(12,20,12,.65);
+    border: .5px solid rgba(201,168,76,.12);
+    border-left: 3px solid #c9a84c;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: .75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all .3s;
+}
+.rd-card:hover {
+    border-color: rgba(201,168,76,.3);
+    transform: translateX(4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+}
+.rd-card-info {}
+.rd-card-title {
+    color: #f0ede6; font-size: .92rem; font-weight: 600;
+    margin-bottom: .35rem;
+}
+.rd-card-meta {
+    color: #6a7a60; font-size: .78rem; line-height: 1.65;
+}
+.rd-card-meta strong { color: #8a9e80; font-weight: 600; }
+.rd-card-right { text-align: right; flex-shrink: 0; }
+.rd-card-amount {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.2rem !important; font-weight: 400 !important;
+    color: #e2c97a !important; margin-bottom: .3rem;
+}
+.rd-card-badge {
+    display: inline-block;
+    background: rgba(74,222,128,.12);
+    color: #4ade80;
+    padding: .2rem .65rem;
+    border-radius: 20px;
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .04em;
+}
+
+/* ── Empty State ── */
+.rd-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: rgba(12,20,12,.5);
+    border: .5px dashed rgba(201,168,76,.2);
+    border-radius: 18px;
+}
+.rd-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; display: block; }
+.rd-empty h3 {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.3rem !important; font-weight: 400 !important;
+    color: #f0ede6 !important; margin: 0 0 .4rem !important;
+}
+.rd-empty p { color: #6a7a60; font-size: .85rem; margin: 0 0 1.5rem; }
+
+/* ── Buttons ── */
+.stButton > button {
+    border-radius: 10px !important;
+    border: .5px solid rgba(201,168,76,.35) !important;
+    color: #e2c97a !important;
+    background: transparent !important;
+    font-weight: 600 !important; font-size: .78rem !important;
+    padding: .45rem 1rem !important; transition: all .18s !important;
+}
+.stButton > button:hover {
+    background: rgba(201,168,76,.1) !important;
+    border-color: rgba(201,168,76,.6) !important;
+}
+[data-testid="baseButton-primary"] {
+    background: linear-gradient(135deg,#c9a84c,#a8852c) !important;
+    color: #0f1a0f !important; font-weight: 700 !important;
+    border: none !important; border-radius: 12px !important;
+    padding: .7rem 2rem !important; font-size: .88rem !important;
+    box-shadow: 0 6px 22px rgba(201,168,76,.3) !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 def main():
-    inject_custom_css()
+    inject_css()
 
+    # ── Header ──
     st.markdown("""
-    <div class="page-header">
-        <h1>Riwayat <span>Donasi</span></h1>
-        <p>Jejak langkah kebaikan yang telah Anda lakukan</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="rd-header">
+<span class="eyebrow">DonasiCare · Riwayat</span>
+<h1>Riwayat <em>Donasi</em></h1>
+<p>Jejak langkah kebaikan yang telah Anda lakukan</p>
+</div>
+""", unsafe_allow_html=True)
 
-    # Ambil riwayat dari database
+    st.markdown('<div class="rd-page">', unsafe_allow_html=True)
+
+    # ── Get Data ──
     db_donations = get_all_donations()
-    
-    # Gabungkan juga riwayat dari session (untuk transaksi yang baru saja dilakukan)
     session_donations = st.session_state.get('riwayat_donasi', [])
 
-    if not db_donations and not session_donations:
+    all_donations = list(db_donations or []) + list(session_donations or [])
+
+    if not all_donations:
         st.markdown("""
-        <div class="empty-state">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
-            <h3>Belum ada riwayat donasi</h3>
-            <p>Anda belum melakukan transaksi donasi.</p>
-        </div>
-        """, unsafe_allow_html=True)
-        col1, col2, col3 = st.columns([1, 1, 1])
-        with col2:
-            if st.button("Mulai Berdonasi", type="primary", use_container_width=True):
+<div class="rd-empty">
+<span class="rd-empty-icon">📭</span>
+<h3>Belum Ada Riwayat Donasi</h3>
+<p>Anda belum melakukan transaksi donasi. Mulailah perjalanan kebaikan Anda hari ini.</p>
+</div>
+""", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns([1.5, 1, 1.5])
+        with c2:
+            if st.button("💛 Mulai Berdonasi", type="primary", use_container_width=True):
                 st.switch_page("pages/donasi.py")
     else:
-        # Tampilkan dari database (terbaru di atas)
+        # ── Summary Stats ──
+        total_amount_db = sum(tx.get('nominal', 0) for tx in (db_donations or []))
+        total_amount_ses = sum(tx.get('amount', 0) for tx in (session_donations or []))
+        total_amount = total_amount_db + total_amount_ses
+        total_count = len(all_donations)
+
+        st.markdown(f"""
+<div class="rd-summary">
+<div class="rd-sum-card">
+<span class="rd-sum-icon">💰</span>
+<div class="rd-sum-num">{format_rupiah(total_amount)}</div>
+<div class="rd-sum-label">Total Donasi Anda</div>
+</div>
+<div class="rd-sum-card">
+<span class="rd-sum-icon">📋</span>
+<div class="rd-sum-num">{total_count}</div>
+<div class="rd-sum-label">Total Transaksi</div>
+</div>
+<div class="rd-sum-card">
+<span class="rd-sum-icon">⭐</span>
+<div class="rd-sum-num">{"Gold" if total_amount >= 1_000_000 else "Silver" if total_amount >= 500_000 else "Bronze"}</div>
+<div class="rd-sum-label">Level Donatur</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+        # ── DB Donations ──
         if db_donations:
-            st.markdown("<h4 style='color:#f1f5f9;'>Riwayat Tersimpan di Database</h4>", unsafe_allow_html=True)
+            st.markdown('<div class="rd-sec-label">📂 Riwayat Tersimpan</div>', unsafe_allow_html=True)
             for tx in db_donations:
                 nama_donatur = "Hamba Allah (Anonim)" if tx.get("anonim") else tx.get("pesan", "Donatur")
                 program_judul = tx.get("program_judul", "Program Donasi")
                 st.markdown(f"""
-                <div class="history-card">
-                    <div class="history-info">
-                        <h4>{program_judul}</h4>
-                        <p class="history-meta">
-                            Donatur: <b>{nama_donatur}</b><br>
-                            Metode: {tx.get('metode_pembayaran', '-')}<br>
-                            Tanggal: {tx.get('tanggal_donasi', '-')}
-                        </p>
-                    </div>
-                    <div class="history-amount">
-                        <div class="amount-value">{format_rupiah(tx.get('nominal', 0))}</div>
-                        <div class="status-badge">Berhasil</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+<div class="rd-card">
+<div class="rd-card-info">
+<div class="rd-card-title">{program_judul}</div>
+<div class="rd-card-meta">
+Donatur: <strong>{nama_donatur}</strong><br>
+Metode: {tx.get('metode_pembayaran', '-')} · Tanggal: {tx.get('tanggal_donasi', '-')}
+</div>
+</div>
+<div class="rd-card-right">
+<div class="rd-card-amount">{format_rupiah(tx.get('nominal', 0))}</div>
+<div class="rd-card-badge">✓ Berhasil</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-        # Tampilkan dari session (transaksi saat ini)
+        # ── Session Donations ──
         if session_donations:
-            st.markdown("<h4 style='color:#f1f5f9; margin-top:2rem;'>Transaksi Sesi Ini</h4>", unsafe_allow_html=True)
+            st.markdown('<div class="rd-sec-label">⚡ Transaksi Sesi Ini</div>', unsafe_allow_html=True)
             for tx in reversed(session_donations):
                 st.markdown(f"""
-                <div class="history-card">
-                    <div class="history-info">
-                        <h4>{tx['program']}</h4>
-                        <p class="history-meta">
-                            ID: <b>{tx['tx_id']}</b><br>
-                            Metode: {tx['method']}<br>
-                            Tanggal: {tx['date']}
-                        </p>
-                    </div>
-                    <div class="history-amount">
-                        <div class="amount-value">{format_rupiah(tx['amount'])}</div>
-                        <div class="status-badge">Berhasil</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+<div class="rd-card">
+<div class="rd-card-info">
+<div class="rd-card-title">{tx['program']}</div>
+<div class="rd-card-meta">
+ID: <strong>{tx['tx_id']}</strong><br>
+Metode: {tx['method']} · Tanggal: {tx['date']}
+</div>
+</div>
+<div class="rd-card-right">
+<div class="rd-card-amount">{format_rupiah(tx['amount'])}</div>
+<div class="rd-card-badge">✓ Berhasil</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)  # close rd-page
+
 
 if __name__ == "__main__":
     main()

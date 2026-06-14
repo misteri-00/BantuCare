@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -9,196 +8,307 @@ from utils.helpers import format_rupiah, get_donation_count, get_total_donated, 
 from utils.impact import get_total_impact
 
 # ═══════════════════════════════════════════════════════════════════════
-# DonasiCare – TRANSPARANSI PAGE
-# Connected to SQLite: Dashboard, Impact Tracker, Peta Bantuan
+# DonasiCare – IMPACT TRACKER · Forest Luxury Theme
 # ═══════════════════════════════════════════════════════════════════════
 
-def inject_custom_css():
+def inject_css():
     st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    * { font-family: 'Inter', sans-serif !important; }
-    .stApp { background: linear-gradient(135deg, #0a0f1c 0%, #121a2e 50%, #0d1520 100%); }
-    header[data-testid="stHeader"] { background: transparent !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body, [class*="css"], * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
-    .page-header {
-        text-align: center;
-        margin: 1rem 0 3rem 0;
-        animation: fadeIn 0.8s ease;
-    }
-    .page-header h1 { color: #f1f5f9; font-size: 2.8rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .page-header h1 span { background: linear-gradient(135deg, #f7c737, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .page-header p { color: #94a3b8; font-size: 1.1rem; }
+.stApp {
+    background: linear-gradient(160deg, #111c11 0%, #0a140a 55%, #101a10 100%) !important;
+    min-height: 100vh;
+}
+header[data-testid="stHeader"] { background: transparent !important; }
+#MainMenu, footer, .stDeployButton { display: none !important; visibility: hidden !important; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #2d4a2d; border-radius: 4px; }
 
-    .section-title {
-        color: #f7c737;
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-        border-bottom: 1px solid rgba(247, 199, 55, 0.2);
-        padding-bottom: 0.5rem;
-    }
+/* ── Page Header ── */
+.it-header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+}
+.it-header .eyebrow {
+    font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: #c9a84c; display: block; margin-bottom: .4rem;
+}
+.it-header h1 {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 2.2rem !important; font-weight: 400 !important;
+    color: #f0ede6 !important; line-height: 1.15 !important;
+    margin: 0 0 .4rem !important;
+}
+.it-header h1 em { font-style: italic; color: #e2c97a; }
+.it-header p { color: #6a7a60; font-size: .88rem; margin: 0; max-width: 520px; margin: 0 auto; }
 
-    .metric-card {
-        background: rgba(30, 41, 59, 0.5);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 16px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-    .metric-card:hover {
-        transform: translateY(-5px);
-        border-color: rgba(247, 199, 55, 0.3);
-    }
-    .metric-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-    .metric-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #f1f5f9;
-        margin-bottom: 0.2rem;
-    }
-    .metric-label { color: #94a3b8; font-size: 0.9rem; font-weight: 500; }
+/* ── Section Titles ── */
+.it-sec {
+    margin: 2.5rem 0 1.25rem;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem;
+}
+.it-sec-eyebrow {
+    font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: #c9a84c; margin-bottom: .2rem;
+}
+.it-sec-title {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.5rem !important; font-weight: 400 !important;
+    color: #f0ede6 !important; margin: 0 !important; line-height: 1.2 !important;
+}
+.it-sec-title em { font-style: italic; color: #e2c97a; }
+.it-sec-sub { color: #6a7a60; font-size: .78rem; margin: .2rem 0 0; }
 
-    .viz-container {
-        background: rgba(30, 41, 59, 0.3);
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
+/* ── Stat Cards ── */
+.it-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.it-stat {
+    background: rgba(15,25,15,.7);
+    border: .5px solid rgba(201,168,76,.15);
+    border-radius: 16px;
+    padding: 1.5rem 1.6rem;
+    transition: all .3s;
+    position: relative; overflow: hidden;
+    text-align: center;
+}
+.it-stat::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #c9a84c, transparent);
+    opacity: 0; transition: opacity .3s;
+}
+.it-stat:hover { transform: translateY(-4px); border-color: rgba(201,168,76,.32);
+                 box-shadow: 0 12px 36px rgba(0,0,0,.3); }
+.it-stat:hover::before { opacity: 1; }
+.it-stat-icon { font-size: 1.8rem; margin-bottom: .5rem; display: block; }
+.it-stat-num {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.75rem !important; font-weight: 400 !important;
+    color: #e2c97a !important; line-height: 1.1; margin-bottom: .25rem;
+}
+.it-stat-label { color: #6a7a60; font-size: .75rem; font-weight: 500; }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    </style>
-    """, unsafe_allow_html=True)
+/* ── Impact Cards ── */
+.it-impacts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.it-impact {
+    background: rgba(12,20,12,.65);
+    border: .5px solid rgba(255,255,255,.06);
+    border-radius: 16px;
+    padding: 1.4rem;
+    text-align: center;
+    transition: all .3s;
+}
+.it-impact:hover { border-color: rgba(201,168,76,.2); transform: translateY(-3px);
+                   box-shadow: 0 12px 28px rgba(0,0,0,.3); }
+.it-impact-icon { font-size: 2.2rem; margin-bottom: .5rem; display: block; }
+.it-impact-num {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.5rem !important; font-weight: 400 !important;
+    color: #e2c97a !important; margin-bottom: .15rem;
+}
+.it-impact-label { color: #8a9e80; font-size: .75rem; font-weight: 500; }
+
+/* ── Chart Container ── */
+.it-chart-box {
+    background: rgba(12,20,12,.65);
+    border: .5px solid rgba(201,168,76,.12);
+    border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: .5rem;
+}
+.it-chart-title {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1rem !important; color: #d4c9b0 !important;
+    font-weight: 400 !important; text-align: center; margin: 0 0 1rem !important;
+}
+
+/* ── Map Container ── */
+.it-map-box {
+    background: rgba(12,20,12,.65);
+    border: .5px solid rgba(201,168,76,.12);
+    border-radius: 18px;
+    padding: 1.25rem;
+    overflow: hidden;
+}
+
+/* ── Page Wrapper ── */
+.it-page { padding: 0 2rem 3rem; max-width: 1280px; margin: 0 auto; }
+
+/* ── Streamlit overrides ── */
+.stButton > button {
+    border-radius: 10px !important;
+    border: .5px solid rgba(201,168,76,.35) !important;
+    color: #e2c97a !important;
+    background: transparent !important;
+    font-weight: 600 !important; font-size: .78rem !important;
+    padding: .45rem 1rem !important; transition: all .18s !important;
+}
+.stButton > button:hover {
+    background: rgba(201,168,76,.1) !important;
+    border-color: rgba(201,168,76,.6) !important;
+    transform: translateY(-1px) !important;
+}
+[data-testid="baseButton-primary"] {
+    background: linear-gradient(135deg,#c9a84c,#a8852c) !important;
+    color: #0f1a0f !important; font-weight: 700 !important;
+    border: none !important; border-radius: 12px !important;
+    padding: .7rem 2rem !important; font-size: .88rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
 def main():
-    inject_custom_css()
+    inject_css()
 
+    # ── Header ──
     st.markdown("""
-    <div class="page-header">
-        <h1>Transparansi & <span>Dampak</span></h1>
-        <p>Lihat secara real-time bagaimana kebaikan Anda tersalurkan dan mengubah dunia</p>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="it-header">
+<span class="eyebrow">DonasiCare · Transparansi</span>
+<h1>Impact <em>Tracker</em></h1>
+<p>Lihat secara real-time bagaimana donasi Anda mengubah kehidupan nyata</p>
+</div>
+""", unsafe_allow_html=True)
 
-    # ==========================================
-    # 1. DASHBOARD DONASI (from DB)
-    # ==========================================
-    st.markdown('<div class="section-title">Dashboard Donasi</div>', unsafe_allow_html=True)
-    
-    # Ambil data dari database
-    total_donasi_kampanye = get_total_donasi()  # Total dari campaigns.dana_terkumpul
-    total_donated = get_total_donated()          # Total dari donations table
+    st.markdown('<div class="it-page">', unsafe_allow_html=True)
+
+    # ═══════════════════════════════════════════
+    # 1. DASHBOARD STATS
+    # ═══════════════════════════════════════════
+    st.markdown("""
+<div class="it-sec">
+<div>
+<div class="it-sec-eyebrow">Dashboard</div>
+<div class="it-sec-title">Ringkasan <em>Donasi</em></div>
+<div class="it-sec-sub">Data real-time dari seluruh program</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+    total_donasi_kampanye = get_total_donasi()
+    total_donated = get_total_donated()
     total_display = max(total_donasi_kampanye, total_donated) if total_donated > 0 else total_donasi_kampanye
     donor_count = get_donation_count()
     campaign_count = get_campaign_count()
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-icon">💰</div>
-            <div class="metric-value">{format_rupiah(total_display)}</div>
-            <div class="metric-label">Total Donasi Terkumpul</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-icon">👥</div>
-            <div class="metric-value">{donor_count}</div>
-            <div class="metric-label">Jumlah Donatur</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-icon">📦</div>
-            <div class="metric-value">{campaign_count}</div>
-            <div class="metric-label">Program Aktif</div>
-        </div>
-        """, unsafe_allow_html=True)
+    st.markdown(f"""
+<div class="it-stats">
+<div class="it-stat">
+<span class="it-stat-icon">💰</span>
+<div class="it-stat-num">{format_rupiah(total_display)}</div>
+<div class="it-stat-label">Total Dana Terkumpul</div>
+</div>
+<div class="it-stat">
+<span class="it-stat-icon">👥</span>
+<div class="it-stat-num">{donor_count:,}</div>
+<div class="it-stat-label">Jumlah Donatur</div>
+</div>
+<div class="it-stat">
+<span class="it-stat-icon">📋</span>
+<div class="it-stat-num">{campaign_count}</div>
+<div class="it-stat-label">Program Aktif</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Grafik Bulanan dari DB
-    st.markdown('<div class="viz-container">', unsafe_allow_html=True)
-    st.markdown("<h4 style='color:#f1f5f9; text-align:center; margin-bottom:1rem;'>Grafik Donasi per Kampanye (Jutaan Rupiah)</h4>", unsafe_allow_html=True)
-    
+    # ═══════════════════════════════════════════
+    # 2. CHART
+    # ═══════════════════════════════════════════
+    st.markdown("""
+<div class="it-sec">
+<div>
+<div class="it-sec-eyebrow">Grafik</div>
+<div class="it-sec-title">Donasi per <em>Kampanye</em></div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
     campaigns = get_all_campaigns()
+
+    st.markdown('<div class="it-chart-box">', unsafe_allow_html=True)
+    st.markdown('<div class="it-chart-title">Dana Terkumpul (Jutaan Rupiah)</div>', unsafe_allow_html=True)
     if campaigns:
         chart_data = pd.DataFrame({
             c["judul"][:20]: [c["dana_terkumpul"] / 1_000_000] for c in campaigns
         })
         st.bar_chart(chart_data, height=350, use_container_width=True)
     else:
-        st.info("Belum ada data kampanye untuk ditampilkan.")
-
+        st.info("Belum ada data kampanye.")
     st.markdown('</div>', unsafe_allow_html=True)
 
+    # ═══════════════════════════════════════════
+    # 3. IMPACT TRACKER
+    # ═══════════════════════════════════════════
+    st.markdown("""
+<div class="it-sec">
+<div>
+<div class="it-sec-eyebrow">Dampak Nyata</div>
+<div class="it-sec-title">Impact <em>Tracker</em></div>
+<div class="it-sec-sub">Setiap angka merepresentasikan harapan baru yang Anda wujudkan</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-    # ==========================================
-    # 2. IMPACT TRACKER (from DB)
-    # ==========================================
-    st.markdown('<div class="section-title">Impact Tracker</div>', unsafe_allow_html=True)
-    st.write("Setiap angka di bawah ini merepresentasikan nyawa dan harapan baru yang telah Anda wujudkan.")
-    
     impact = get_total_impact()
     penerima = f"{impact.get('penerima', 0):,}".replace(",", ".")
     laptop = f"{impact.get('laptop', 0):,}".replace(",", ".")
     pohon = f"{impact.get('pohon', 0):,}".replace(",", ".")
     sekolah = f"{impact.get('sekolah', 0):,}".replace(",", ".")
 
-    ic1, ic2, ic3, ic4 = st.columns(4)
-    impact_data = [
-        ("❤️", penerima, "Penerima Manfaat", ic1),
-        ("💻", laptop, "Laptop Dibagikan", ic2),
-        ("🌳", pohon, "Pohon Ditanam", ic3),
-        ("🏫", sekolah, "Sekolah Direnovasi", ic4)
-    ]
-    
-    for icon, value, label, col in impact_data:
-        with col:
-            st.markdown(f"""
-            <div class="metric-card" style="padding: 1rem;">
-                <div class="metric-icon" style="font-size:2rem;">{icon}</div>
-                <div class="metric-value" style="font-size:1.4rem; color:#f59e0b;">{value}</div>
-                <div class="metric-label">{label}</div>
-            </div>
-            """, unsafe_allow_html=True)
+    st.markdown(f"""
+<div class="it-impacts">
+<div class="it-impact">
+<span class="it-impact-icon">❤️</span>
+<div class="it-impact-num">{penerima}</div>
+<div class="it-impact-label">Penerima Manfaat</div>
+</div>
+<div class="it-impact">
+<span class="it-impact-icon">💻</span>
+<div class="it-impact-num">{laptop}</div>
+<div class="it-impact-label">Laptop Dibagikan</div>
+</div>
+<div class="it-impact">
+<span class="it-impact-icon">🌳</span>
+<div class="it-impact-num">{pohon}</div>
+<div class="it-impact-label">Pohon Ditanam</div>
+</div>
+<div class="it-impact">
+<span class="it-impact-icon">🏫</span>
+<div class="it-impact-num">{sekolah}</div>
+<div class="it-impact-label">Sekolah Direnovasi</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    # ═══════════════════════════════════════════
+    # 4. PETA SEBARAN
+    # ═══════════════════════════════════════════
+    st.markdown("""
+<div class="it-sec">
+<div>
+<div class="it-sec-eyebrow">Jangkauan</div>
+<div class="it-sec-title">Peta Sebaran <em>Bantuan</em></div>
+<div class="it-sec-sub">Titik-titik penyaluran program di seluruh Indonesia</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
-
-    # ==========================================
-    # 3. PETA BANTUAN (from DB campaigns lat/lon)
-    # ==========================================
-    st.markdown('<div class="section-title">Peta Sebaran Bantuan</div>', unsafe_allow_html=True)
-    st.write("Lokasi titik-titik penyaluran program bantuan kami di seluruh Indonesia.")
-    
-    st.markdown('<div class="viz-container">', unsafe_allow_html=True)
-    
-    # Ambil koordinat dari kampanye yang punya latitude/longitude
+    st.markdown('<div class="it-map-box">', unsafe_allow_html=True)
     map_points = []
     for c in campaigns:
         if c.get("latitude") and c.get("longitude"):
             map_points.append({"lat": c["latitude"], "lon": c["longitude"]})
-    
+
     if map_points:
         map_data = pd.DataFrame(map_points)
-        st.map(map_data, zoom=4, color="#f7c737", size=20)
+        st.map(map_data, zoom=4, color="#c9a84c", size=20)
     else:
         st.info("Belum ada data koordinat lokasi bantuan.")
-
     st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)  # close it-page
 
 
 if __name__ == "__main__":
