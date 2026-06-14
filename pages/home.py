@@ -631,11 +631,11 @@ box-shadow: 0 10px 32px rgba(201,168,76,.45) !important;
 # ══════════════════════════════════════════════════════════════════════
 def render_navbar():
     st.markdown("""
-<div class="dc-nav">
-<a class="dc-nav-brand" href="#">
-<div class="dc-nav-logo">💚</div>
-<span class="dc-nav-name">DonasiCare</span>
-</a>
+<nav class="dc-nav">
+  <a class="dc-nav-brand" href="#">
+    <img class="dc-nav-logo" src="/assets/erasebg-transformed-1.png" alt="Logo DonasiCare">
+    <span class="dc-nav-name">DonasiCare</span>
+  </a>
 <nav class="dc-nav-links">
 <a href="home"         class="active" target="_self">Beranda</a>
 <a href="programdonasi"               target="_self">Program</a>
