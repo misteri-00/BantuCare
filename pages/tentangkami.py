@@ -8,103 +8,160 @@ import streamlit as st
 def inject_custom_css():
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    * { font-family: 'Inter', sans-serif !important; }
-    .stApp { background: linear-gradient(135deg, #0a0f1c 0%, #121a2e 50%, #0d1520 100%); }
+    html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    .stApp { background: linear-gradient(160deg, #111c11 0%, #0a140a 55%, #101a10 100%) !important; }
     header[data-testid="stHeader"] { background: transparent !important; }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #2d4a2d; border-radius: 4px; }
 
     /* ── Header ── */
     .page-header {
         text-align: center;
-        margin: 1rem 0 3rem 0;
-        animation: fadeIn 0.8s ease;
+        padding: 3rem 0 2rem;
+        animation: fadeInDown 0.8s ease-out;
     }
-    .page-header h1 { color: #f1f5f9; font-size: 2.8rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .page-header h1 span { background: linear-gradient(135deg, #f7c737, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .page-header p { color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .page-header h1 {
+        font-family: 'DM Serif Display', serif !important;
+        color: #f0ede6;
+        font-size: 3.5rem;
+        font-weight: 400;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+    }
+    .page-header h1 span {
+        background: linear-gradient(135deg, #e2c97a, #c9a84c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-style: italic;
+    }
+    .page-header p {
+        color: #8a9e80;
+        font-size: 1.15rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
 
     /* ── Section Blocks ── */
     .glass-box {
-        background: rgba(30, 41, 59, 0.5);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.06);
-        border-radius: 16px;
-        padding: 2rem;
+        background: rgba(20, 30, 20, 0.4);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 2.5rem;
         margin-bottom: 2rem;
-        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .glass-box:hover {
-        border-color: rgba(247, 199, 55, 0.2);
+        border-color: rgba(201, 168, 76, 0.25);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.3), 0 0 20px rgba(201, 168, 76, 0.05);
+        transform: translateY(-4px);
     }
     .glass-box h3 {
-        color: #f7c737;
+        font-family: 'DM Serif Display', serif !important;
+        color: #e2c97a;
+        font-size: 1.8rem;
         margin-top: 0;
         margin-bottom: 1rem;
-        font-weight: 700;
+        font-weight: 400;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
     .glass-box p {
-        color: #e2e8f0;
+        color: #a0b098;
         line-height: 1.7;
         font-size: 0.95rem;
     }
 
     /* ── Team Cards ── */
     .team-card {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px solid rgba(255,255,255,0.05);
-        border-radius: 12px;
-        padding: 1.5rem;
+        background: rgba(12, 20, 12, 0.65);
+        border: 1px solid rgba(255,255,255,0.04);
+        border-radius: 20px;
+        padding: 2rem;
         text-align: center;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .team-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 4px;
+        background: linear-gradient(90deg, #e2c97a, #c9a84c);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
     .team-card:hover {
         transform: translateY(-8px);
-        box-shadow: 0 10px 30px rgba(247, 199, 55, 0.1);
-        border-color: rgba(247, 199, 55, 0.3);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(201, 168, 76, 0.1);
+        border-color: rgba(201, 168, 76, 0.3);
     }
+    .team-card:hover::before { opacity: 1; }
+    
     .team-avatar {
-        width: 80px;
-        height: 80px;
+        width: 85px;
+        height: 85px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #f7c737, #f59e0b);
-        color: #0f172a;
-        font-size: 2rem;
-        font-weight: 800;
+        background: linear-gradient(135deg, #e2c97a, #c9a84c);
+        color: #0a140a;
+        font-size: 2.2rem;
+        font-family: 'DM Serif Display', serif !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem auto;
+        margin: 0 auto 1.2rem auto;
+        box-shadow: 0 8px 20px rgba(201, 168, 76, 0.3);
+        transition: transform 0.3s ease;
     }
-    .team-name { color: #f1f5f9; font-weight: 700; font-size: 1.1rem; margin-bottom: 0.2rem; }
-    .team-role { color: #f59e0b; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.8rem; }
-    .team-desc { color: #94a3b8; font-size: 0.8rem; line-height: 1.5; }
+    .team-card:hover .team-avatar { transform: scale(1.1); }
+    .team-name { color: #f0ede6; font-weight: 700; font-size: 1.25rem; margin-bottom: 0.2rem; }
+    .team-role { color: #c9a84c; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;}
+    .team-desc { color: #8a9e80; font-size: 0.9rem; line-height: 1.6; }
 
     /* ── Contact Info ── */
+    .contact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
     .contact-item {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 15px;
-        margin-bottom: 1.2rem;
-        color: #e2e8f0;
+        text-align: center;
+        background: rgba(12, 20, 12, 0.5);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.03);
+        transition: transform 0.3s ease;
+    }
+    .contact-item:hover {
+        transform: translateY(-4px);
+        border-color: rgba(201, 168, 76, 0.2);
     }
     .contact-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 10px;
-        background: rgba(247, 199, 55, 0.1);
-        color: #f7c737;
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(201, 168, 76, 0.15), rgba(201, 168, 76, 0.05));
+        color: #e2c97a;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.3);
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
         to { opacity: 1; transform: translateY(0); }
     }
     </style>
@@ -191,30 +248,25 @@ def main():
     st.markdown("""
     <div class="glass-box">
         <h3>📞 Hubungi Kami</h3>
-        <p style="margin-bottom: 1.5rem;">Punya pertanyaan, tawaran kerja sama, atau ingin melaporkan kendala? Jangan ragu untuk menghubungi tim kami.</p>
+        <p>Punya pertanyaan, tawaran kerja sama, atau ingin melaporkan kendala? Jangan ragu untuk menghubungi tim kami.</p>
         
-        <div class="contact-item">
-            <div class="contact-icon">📧</div>
-            <div>
-                <strong style="color: #f7c737;">Email</strong><br>
-                halo@donasicare.id
+        <div class="contact-grid">
+            <div class="contact-item">
+                <div class="contact-icon">📧</div>
+                <strong style="color: #f0ede6; font-size: 1.1rem; margin-bottom: 0.2rem;">Email</strong>
+                <span style="color: #8a9e80; font-size: 0.9rem;">halo@donasicare.id</span>
             </div>
-        </div>
-        
-        <div class="contact-item">
-            <div class="contact-icon">📱</div>
-            <div>
-                <strong style="color: #f7c737;">WhatsApp / Telepon</strong><br>
-                +62 811-1234-5678 (Senin-Jumat, 09.00 - 17.00)
+            
+            <div class="contact-item">
+                <div class="contact-icon">📱</div>
+                <strong style="color: #f0ede6; font-size: 1.1rem; margin-bottom: 0.2rem;">WhatsApp</strong>
+                <span style="color: #8a9e80; font-size: 0.9rem;">+62 811-1234-5678</span>
             </div>
-        </div>
-        
-        <div class="contact-item">
-            <div class="contact-icon">📍</div>
-            <div>
-                <strong style="color: #f7c737;">Alamat Kantor</strong><br>
-                Gedung Kebaikan Nusantara, Lt. 8<br>
-                Jl. Jend. Sudirman Kav. 24, Jakarta Selatan, 12920
+            
+            <div class="contact-item">
+                <div class="contact-icon">📍</div>
+                <strong style="color: #f0ede6; font-size: 1.1rem; margin-bottom: 0.2rem;">Kantor Pusat</strong>
+                <span style="color: #8a9e80; font-size: 0.9rem;">Gedung Kebaikan Nusantara<br>Jl. Jend. Sudirman Kav. 24, Jakarta</span>
             </div>
         </div>
     </div>

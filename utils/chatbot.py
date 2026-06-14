@@ -11,16 +11,83 @@ from utils.helpers import format_rupiah, get_donation_count
 #           randomized natural responses, campaign data integration
 # ═══════════════════════════════════════════════════════════════════════
 
+DETAILED_PROGRAMS = {
+    "banjir_demak": {
+        "id": "banjir_demak",
+        "judul": "Banjir Demak 2026",
+        "kategori": "Bencana Alam",
+        "tanggal_kejadian": "5 Juni 2026",
+        "waktu_kejadian": "02.15 WIB",
+        "deskripsi": "Banjir terjadi akibat curah hujan tinggi dan meluapnya Sungai Wulan yang menyebabkan genangan di beberapa wilayah Kabupaten Demak. Curah hujan ekstrem berlangsung selama kurang lebih 8 jam.",
+        "wilayah_terdampak": ["Kecamatan Karanganyar", "Kecamatan Gajah", "Kecamatan Sayung", "Kecamatan Bonang", "Kecamatan Mijen"],
+        "detail_wilayah": "37 desa terdampak dengan ketinggian air 30 cm hingga 150 cm. Luas wilayah terdampak diperkirakan mencapai 1.250 hektar.",
+        "jumlah_jiwa": 3240,
+        "jumlah_keluarga": 815,
+        "detail_korban": "Di antaranya:\n👶 412 anak-anak\n👵 156 lansia\n🤰 48 ibu hamil\n🤕 17 korban luka ringan\n🚑 3 korban luka berat\nSaat ini sebagian warga masih berada di lokasi pengungsian.",
+        "kebutuhan": ["🍚 Makanan siap saji", "💧 Air bersih", "👶 Susu dan perlengkapan bayi", "🛏️ Selimut dan tikar", "🧼 Paket kebersihan", "📚 Perlengkapan sekolah anak-anak"],
+        "dampak_100k": "🍚 Paket makanan untuk 2 keluarga\n💧 Air bersih untuk 20 orang\n🧼 Paket kebersihan darurat untuk 2 keluarga",
+        "dampak_500k": "🍚 Paket makanan untuk 10 keluarga\n💧 Air bersih untuk 100 orang\n🧼 Paket kebersihan darurat untuk 10 keluarga"
+    },
+    "pendidikan": {
+        "id": "pendidikan",
+        "judul": "Program Beasiswa Anak Indonesia",
+        "kategori": "Pendidikan",
+        "deskripsi": "Program ini membantu anak-anak dari keluarga kurang mampu agar tetap dapat melanjutkan pendidikan.",
+        "wilayah_terdampak": ["Jawa Tengah", "Jawa Barat", "Nusa Tenggara Timur"],
+        "detail_wilayah": "42 sekolah",
+        "jumlah_jiwa": 850,
+        "detail_korban": "👨‍🎓 850 siswa aktif\n📚 320 siswa SD\n📖 290 siswa SMP\n🎓 240 siswa SMA\nMayoritas berasal dari keluarga dengan penghasilan di bawah UMR daerah setempat.",
+        "dampak_100k": "✅ 10 buku tulis\n✅ 20 pensil\n✅ 10 pulpen\n✅ 5 penghapus\n✅ 2 kotak pensil\natau\n🎒 Mendukung perlengkapan belajar 1 siswa selama beberapa minggu.",
+        "dampak_500k": "✅ 50 buku tulis\n✅ 100 pensil\n✅ 25 pulpen\n✅ 10 penggaris\n✅ 5 tas sekolah\n✅ 5 paket alat tulis lengkap"
+    },
+    "kesehatan": {
+        "id": "kesehatan",
+        "judul": "Program Bantuan Pengobatan Pasien Tidak Mampu",
+        "kategori": "Kesehatan",
+        "deskripsi": "Program ini membantu masyarakat yang kesulitan mendapatkan akses layanan kesehatan.",
+        "wilayah_terdampak": ["Jawa Tengah", "Jawa Timur"],
+        "jumlah_jiwa": 1200,
+        "detail_korban": "Penerima manfaat: 1.200 pasien",
+        "kebutuhan": ["💊 Obat-obatan dasar", "🩺 Pemeriksaan kesehatan", "🚑 Transportasi pasien", "🧪 Tes laboratorium", "🥛 Nutrisi tambahan pasien"],
+        "dampak_100k": "💊 Membantu penyediaan obat dasar untuk 2 pasien\n🩺 Membantu biaya pemeriksaan kesehatan\n🥛 Menyediakan paket nutrisi pasien selama beberapa hari"
+    },
+    "lingkungan": {
+        "id": "lingkungan",
+        "judul": "Program Penanaman Pohon Indonesia Hijau",
+        "kategori": "Lingkungan",
+        "deskripsi": "Program ini bertujuan memulihkan lahan kritis dan meningkatkan kualitas lingkungan hidup.",
+        "wilayah_terdampak": ["Jawa Tengah", "Jawa Barat", "Kalimantan"],
+        "detail_wilayah": "Di 23 lokasi penghijauan",
+        "jumlah_jiwa": 500,
+        "detail_korban": "Melibatkan lebih dari 500 relawan lingkungan. Saat ini telah berhasil ditanam 18.750 pohon.",
+        "dampak_100k": "✅ 5 bibit pohon produktif\n✅ Pupuk dan media tanam\n✅ Perawatan awal pohon\nEstimasi penyerapan karbon dari pohon yang ditanam dapat mencapai puluhan kilogram CO₂ selama masa pertumbuhannya."
+    }
+}
 
 # ── Intent Patterns ───────────────────────────────────────────────────
-# Setiap intent memiliki beberapa pola regex untuk menangkap variasi ucapan
 INTENT_PATTERNS = {
     "greeting": [
-        r"\b(halo|hai|hi|hey|selamat|assalamualaikum|pagi|siang|sore|malam|helo)\b",
+        r"\b(halo|hai|hi|hey|selamat|assalamualaikum|pagi|siang|sore|malam|helo)\b"
     ],
     "farewell": [
-        r"\b(bye|dadah|sampai jumpa|terima kasih|makasih|thanks|selamat tinggal)\b",
+        r"\b(bye|dadah|sampai jumpa|terima kasih|makasih|thanks|selamat tinggal)\b"
     ],
+    
+    # Detail Program Utama (Program 1)
+    "ask_disaster_detail": [r"\b(banjir demak)\b", r"(detail|info).*(banjir demak)"],
+    "ask_education_detail": [r"(program|bantuan).*(pendidikan|beasiswa|sekolah)"],
+    "ask_health_detail": [r"(program|bantuan).*(kesehatan|medis|pengobatan|sakit)"],
+    "ask_environment_detail": [r"(program|bantuan).*(lingkungan|penghijauan|pohon|alam)"],
+    
+    # Pertanyaan Kontekstual Program (Program 1)
+    "ask_date_time": [r"(kapan).*(terjadi|kejadian|mulai)", r"(tanggal|waktu).*(berapa|kejadian)"],
+    "ask_location": [r"(dimana|di mana|wilayah mana|lokasi).*(terdampak|kejadian)"],
+    "ask_victim_count": [r"(berapa).*(korban|jiwa|terdampak|orang|anak|siswa)"],
+    "ask_needs": [r"(apa).*(kebutuhan|dibutuhkan|mendesak)"],
+    "ask_impact_100k": [r"(kalau|jika).*(donasi|nyumbang|sumbang).*(100|seratus).*(ribu)"],
+    "ask_impact_500k": [r"(kalau|jika).*(donasi|nyumbang|sumbang).*(500|lima ratus).*(ribu)"],
+    
+    # Statistik & Kategori Kampanye Dinamis (Program 2)
     "ask_total_donation": [
         r"(total|berapa|jumlah).*(donasi|dana|uang|terkumpul|sumbangan)",
         r"(dana|donasi|uang).*(terkumpul|masuk|diterima|total)",
@@ -91,12 +158,9 @@ INTENT_PATTERNS = {
     ],
 }
 
-
 def classify_intent(text: str) -> str:
     """Klasifikasikan intent dari teks pengguna menggunakan regex pattern matching."""
     text_lower = text.lower().strip()
-    
-    # Cek setiap intent pattern
     scores = {}
     for intent, patterns in INTENT_PATTERNS.items():
         score = 0
@@ -108,10 +172,7 @@ def classify_intent(text: str) -> str:
     
     if not scores:
         return "unknown"
-    
-    # Kembalikan intent dengan skor tertinggi
     return max(scores, key=scores.get)
-
 
 def detect_mood(text: str) -> str:
     """Deteksi mood/sentimen sederhana dari teks."""
@@ -128,9 +189,29 @@ def detect_mood(text: str) -> str:
         return "negative"
     return "neutral"
 
+# ── Context Management ───────────────────────────────────────────────
+def detect_context(history: list) -> str:
+    if not history: return None
+    # Cari ke belakang hingga 5 pesan terakhir untuk mendeteksi program aktif
+    for msg in reversed(history[-5:]):
+        text = msg.get("content", "").lower() if isinstance(msg, dict) else str(msg).lower()
+        if "banjir demak" in text: return "banjir_demak"
+        if "pendidikan" in text or "beasiswa" in text: return "pendidikan"
+        if "kesehatan" in text or "pengobatan" in text: return "kesehatan"
+        if "penghijauan" in text or "lingkungan" in text or "pohon" in text: return "lingkungan"
+    return None
+
+def _get_active_program_data(context: str, default_intent: str):
+    prog_id = context
+    if not prog_id:
+        if default_intent == "ask_disaster_detail": prog_id = "banjir_demak"
+        elif default_intent == "ask_education_detail": prog_id = "pendidikan"
+        elif default_intent == "ask_health_detail": prog_id = "kesehatan"
+        elif default_intent == "ask_environment_detail": prog_id = "lingkungan"
+    
+    return DETAILED_PROGRAMS.get(prog_id)
 
 # ── Response Templates (Humanist, Empathetic, Persuasive) ──────────────────
-
 GREETING_RESPONSES = [
     "Halo, Kak! 👋 Senang sekali bisa mengobrol dengan Anda. Saya CareBot, siap membantu menjawab pertanyaan seputar program kebaikan di DonasiCare. Ada yang bisa saya bantu hari ini? 😊",
     "Hai! Selamat datang di DonasiCare. 🌿 Saya di sini untuk menemani Anda mencari cara terbaik berbagi kebaikan. Ada program spesifik yang ingin Kakak tanyakan?",
@@ -139,15 +220,6 @@ GREETING_RESPONSES = [
 FAREWELL_RESPONSES = [
     "Sama-sama! Terima kasih banyak sudah berkunjung dan peduli pada sesama, Kak! ❤️ Semoga hari Anda penuh berkah. Jangan ragu untuk kembali jika ada yang ingin ditanyakan lagi ya. 👋",
     "Terima kasih kembali atas kepedulian Anda. 🙏 Sekecil apapun kebaikan kita, pasti sangat berarti bagi mereka yang membutuhkan. Sampai jumpa lagi! ✨",
-]
-
-TRANSPARENCY_RESPONSES = [
-    "DonasiCare berkomitmen 100% transparan! 📊\n\n"
-    "• Setiap donasi tercatat di sistem kami secara real-time\n"
-    "• Laporan penggunaan dana bisa dilihat di halaman **Transparansi**\n"
-    "• Kami memastikan dana sampai ke penerima manfaat yang tepat\n"
-    "• Audit dilakukan secara berkala untuk menjaga akuntabilitas\n\n"
-    "Anda bisa mengecek dashboard transparansi kami kapan saja!",
 ]
 
 VOLUNTEER_RESPONSES = [
@@ -174,9 +246,7 @@ NEGATIVE_RESPONSES = [
     "Kami minta maaf jika ada yang kurang berkenan. Kami selalu terbuka untuk saran dan perbaikan. Silakan hubungi kami melalui halaman **Tentang Kami** untuk feedback lebih lanjut.",
 ]
 
-
 def _get_time_greeting() -> str:
-    """Dapatkan sapaan berdasarkan waktu saat ini."""
     hour = datetime.datetime.now().hour
     if hour < 11:
         return "Selamat pagi"
@@ -186,9 +256,7 @@ def _get_time_greeting() -> str:
         return "Selamat sore"
     return "Selamat malam"
 
-
 def _build_donation_guide() -> str:
-    """Bangun panduan donasi yang informatif."""
     return (
         "Berdonasi di DonasiCare sangat mudah dan aman kok, Kak! 📋\n\n"
         "1️⃣ Pilih program yang mengetuk hati Kakak di halaman **Donasi Sekarang**\n"
@@ -199,9 +267,7 @@ def _build_donation_guide() -> str:
         "Setiap kontribusi Kakak, sekecil apapun, akan membawa senyum bagi mereka."
     )
 
-
 def _build_payment_info() -> str:
-    """Bangun informasi metode pembayaran."""
     return (
         "Kami menyediakan berbagai metode pembayaran untuk kemudahan Anda: 💳\n\n"
         "**Virtual Account:**\n"
@@ -217,9 +283,7 @@ def _build_payment_info() -> str:
         "Semua metode aman dan terverifikasi. Bukti donasi akan langsung tersimpan di riwayat Anda. ✅"
     )
 
-
 def _build_campaign_response(kategori: str, intro: str) -> str:
-    """Bangun respons rekomendasi kampanye dari database."""
     campaigns = get_campaigns_by_category(kategori)
     if not campaigns:
         all_campaigns = get_all_campaigns()
@@ -241,15 +305,12 @@ def _build_campaign_response(kategori: str, intro: str) -> str:
     response += "Kunjungi halaman **Donasi Sekarang** untuk mulai membantu! 💛"
     return response
 
-
 def _build_recommendation_response() -> str:
-    """Bangun respons rekomendasi umum (top 3 program)."""
     campaigns = get_all_campaigns()
     if not campaigns:
         return "Maaf, belum ada program kampanye yang tersedia saat ini."
     
     sorted_campaigns = sorted(campaigns, key=lambda c: c.get('dana_terkumpul', 0), reverse=True)[:3]
-    
     response = "Berikut **3 program unggulan** kami yang paling banyak mendapat dukungan: 🏆\n\n"
     for i, c in enumerate(sorted_campaigns, 1):
         progress = min(int((c['dana_terkumpul'] / c['target_dana']) * 100), 100) if c['target_dana'] > 0 else 0
@@ -258,32 +319,100 @@ def _build_recommendation_response() -> str:
     response += "Anda bisa melihat detail lengkapnya di halaman **Program Donasi**."
     return response
 
-
-def generate_smart_response(prompt: str, chat_history: list = None) -> str:
+# ── Smart Response Generator ──────────────────────────────────────────
+def generate_smart_response(text: str, history: list = None, chat_history: list = None) -> str:
     """
     Mesin respons utama chatbot DonasiCare.
-    Mengklasifikasi intent, mempertimbangkan konteks, dan menghasilkan jawaban dinamis.
+    Mendukung argument 'history' maupun 'chat_history' untuk menjamin fleksibilitas integrasi UI.
     """
-    intent = classify_intent(prompt)
-    mood = detect_mood(prompt)
+    if history is None:
+        history = chat_history if chat_history is not None else []
+        
+    intent = classify_intent(text)
+    mood = detect_mood(text)
     
-    # Jika mood negatif terdeteksi, prioritaskan empati
+    # Prioritaskan rasa empati jika mood terdeteksi negatif/positif saat intent tak dikenal
     if mood == "negative" and intent == "unknown":
         intent = "negative_sentiment"
     elif mood == "positive" and intent == "unknown":
         intent = "positive_sentiment"
-        
-    # Variasi kata pengantar natural
+    
     fillers_info = ["Tentu saja! ", "Baiklah, ", "Siap! ", "Oh, tentu bisa. ", "Ini dia detailnya: ", "Mari saya jelaskan. "]
     fillers_search = ["Hmm, sebentar ya saya carikan... 🤔\n\n", "Beri saya waktu sejenak untuk mengecek... 🔍\n\n", "Wah, niat yang sangat mulia! Ini beberapa daftarnya:\n\n"]
     
-    # ── Build response berdasarkan intent ──
+    # 1. Program Introduction Intents (Statis - Program 1)
+    if intent == "ask_disaster_detail":
+        p = DETAILED_PROGRAMS["banjir_demak"]
+        return f"📍 **{p['judul']}**\n\n{p['deskripsi']}\n\n📅 Tanggal kejadian:\n{p['tanggal_kejadian']}\n\n⏰ Waktu awal kejadian:\n{p['waktu_kejadian']}\n\nSaat ini proses evakuasi dan distribusi bantuan masih terus dilakukan."
+    
+    elif intent == "ask_education_detail":
+        p = DETAILED_PROGRAMS["pendidikan"]
+        return f"📚 **{p['judul']}**\n\n{p['deskripsi']}\n\n👧 Penerima manfaat:\n{p['jumlah_jiwa']} siswa\n\n📍 Wilayah:\n{', '.join(p['wilayah_terdampak'])}\n\n🏫 Sekolah yang terlibat:\n{p['detail_wilayah']}"
+        
+    elif intent == "ask_health_detail":
+        p = DETAILED_PROGRAMS["kesehatan"]
+        return f"🏥 **{p['judul']}**\n\n{p['deskripsi']}\n\n👥 Penerima manfaat:\n{p['jumlah_jiwa']} pasien\n\n📍 Wilayah:\n{', '.join(p['wilayah_terdampak'])}"
+        
+    elif intent == "ask_environment_detail":
+        p = DETAILED_PROGRAMS["lingkungan"]
+        return f"🌱 **{p['judul']}**\n\n{p['deskripsi']}\n\n📍 Lokasi:\n{', '.join(p['wilayah_terdampak'])}\n\n🌳 Target:\n{p['jumlah_jiwa']} relawan"
+
+    # 2. Contextual Questions (Program 1 Context Flow)
+    context = detect_context(history)
+    p = _get_active_program_data(context, intent)
+    
+    if p:
+        if intent == "ask_date_time":
+            if "tanggal_kejadian" in p:
+                return f"📅 {p['judul']} mulai terjadi pada:\n\n{p['tanggal_kejadian']}\n\n⏰ Sekitar pukul {p['waktu_kejadian']}.\n\n{p['deskripsi']}"
+            return f"Program {p['judul']} berjalan sepanjang tahun."
+            
+        elif intent == "ask_location":
+            resp = f"📍 Wilayah untuk {p['judul']}:\n\n"
+            for i, w in enumerate(p['wilayah_terdampak'], 1):
+                resp += f"{i}. {w}\n"
+            if "detail_wilayah" in p:
+                resp += f"\nTotal:\n{p['detail_wilayah']}"
+            return resp
+            
+        elif intent == "ask_victim_count":
+            return f"👥 Data untuk {p['judul']}:\n\nTotal jiwa:\n{p['jumlah_jiwa']}\n\n{p.get('detail_korban', '')}"
+            
+        elif intent == "ask_needs":
+            if "kebutuhan" in p:
+                resp = f"Saat ini kebutuhan utama untuk {p['judul']} adalah:\n\n"
+                for n in p['kebutuhan']: resp += f"{n}\n"
+                return resp
+            return f"Kami menggalang dana tunai untuk disalurkan ke berbagai kebutuhan mendesak {p['judul']}."
+            
+        elif intent == "ask_impact_100k":
+            return f"Terima kasih atas kepedulian Kakak ❤️\n\nDengan donasi Rp100.000 untuk {p['judul']}, bantuan yang dapat diberikan antara lain:\n\n{p['dampak_100k']}"
+            
+        elif intent == "ask_impact_500k":
+            if "dampak_500k" in p:
+                return f"Dengan donasi Rp500.000 untuk {p['judul']}, bantuan yang dapat diberikan antara lain:\n\n{p['dampak_500k']}"
+            return f"Terima kasih! Donasi Rp500.000 akan sangat berarti untuk mendukung program {p['judul']} secara luas."
+
+    # 3. Category Search Intents (Dinamis dari Database - Program 2)
+    if intent == "search_education":
+        return random.choice(fillers_search) + _build_campaign_response("Pendidikan", "📚 Berikut program **pendidikan** yang sedang membutuhkan bantuan:")
+    
+    elif intent == "search_health":
+        return random.choice(fillers_search) + _build_campaign_response("Kesehatan", "🏥 Berikut program **kesehatan** yang sedang berjalan:")
+    
+    elif intent == "search_disaster":
+        return random.choice(fillers_search) + _build_campaign_response("Bencana Alam", "🆘 Berikut program **bantuan bencana** darurat:")
+    
+    elif intent == "search_environment":
+        return random.choice(fillers_search) + _build_campaign_response("Lingkungan", "🌿 Berikut program **lingkungan** yang bisa didukung:")
+
+    # 4. Generic & Informational Intents (Penggabungan Program 1 & 2)
     if intent == "greeting":
         return random.choice(GREETING_RESPONSES)
-    
+        
     elif intent == "farewell":
         return random.choice(FAREWELL_RESPONSES)
-    
+        
     elif intent == "ask_total_donation":
         total = get_total_donasi()
         donor_count = get_donation_count()
@@ -296,7 +425,7 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
             f"📋 Program aktif: **{campaign_count}** program\n\n"
             f"Angka ini terus bertambah berkat kebaikan para donatur seperti Anda! 🙏"
         )
-    
+        
     elif intent == "ask_program_count":
         count = get_campaign_count()
         prefix = random.choice(fillers_info)
@@ -305,7 +434,7 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
             f"di berbagai kategori seperti Pendidikan, Kesehatan, Bencana Alam, dan lainnya.\n\n"
             f"Anda bisa mengunjungi halaman **Program Donasi** untuk melihat detail setiap program!"
         )
-    
+        
     elif intent == "ask_donor_count":
         donor_count = get_donation_count()
         prefix = random.choice(["Luar biasa, ", "Sampai detik ini, ", "Tercatat, "])
@@ -314,25 +443,13 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
             f"Setiap orang yang berdonasi turut menciptakan perubahan nyata. "
             f"Bergabunglah dan jadilah bagian dari gerakan kebaikan ini!"
         )
-    
-    elif intent == "search_education":
-        return random.choice(fillers_search) + _build_campaign_response("Pendidikan", "📚 Berikut program **pendidikan** yang sedang membutuhkan bantuan:")
-    
-    elif intent == "search_health":
-        return random.choice(fillers_search) + _build_campaign_response("Kesehatan", "🏥 Berikut program **kesehatan** yang sedang berjalan:")
-    
-    elif intent == "search_disaster":
-        return random.choice(fillers_search) + _build_campaign_response("Bencana Alam", "🆘 Berikut program **bantuan bencana** darurat:")
-    
-    elif intent == "search_environment":
-        return random.choice(fillers_search) + _build_campaign_response("Lingkungan", "🌿 Berikut program **lingkungan** yang bisa didukung:")
-    
+        
     elif intent == "ask_how_to_donate":
         return _build_donation_guide()
-    
+        
     elif intent == "ask_payment_method":
         return _build_payment_info()
-    
+        
     elif intent == "ask_transparency":
         return (
             "Pertanyaan yang sangat bagus dan penting, Kak! 💡\n\n"
@@ -352,8 +469,7 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
         )
         
     elif intent == "ask_impact_simulation":
-        # Ekstrak nominal dari teks
-        matches = re.findall(r"(?:rp|Rp)?\s*(\d{1,3}(?:\.\d{3})*|\d+)", prompt.lower())
+        matches = re.findall(r"(?:rp|Rp)?\s*(\d{1,3}(?:\.\d{3})*|\d+)", text.lower())
         nom = 0
         if matches:
             clean_m = matches[0].replace(".", "")
@@ -397,25 +513,29 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
                 "Bantuan Anda bisa menjadi makanan bagi yang lapar, obat bagi yang sakit, atau harapan bagi anak yang ingin sekolah.\n\n"
                 "Ada program spesifik yang ingin Kakak ketahui lebih lanjut?"
             )
-    
+            
     elif intent == "ask_volunteer":
         return random.choice(VOLUNTEER_RESPONSES)
-    
+        
     elif intent == "ask_about":
         return random.choice(ABOUT_RESPONSES)
-    
+        
     elif intent == "ask_recommendation":
         return random.choice(["Tentu, saya punya beberapa saran nih! ", "Ini dia program-program pilihan kami: ", "Berdasarkan data kami, "]) + _build_recommendation_response()
-    
+        
     elif intent == "positive_sentiment":
         return random.choice(POSITIVE_RESPONSES)
-    
+        
     elif intent == "negative_sentiment":
         return random.choice(NEGATIVE_RESPONSES)
-    
-    # ── Fallback: coba cari keyword di nama kampanye ──
+
+    # 5. Fallback jika pertanyaannya spesifik butuh konteks (Program 1)
+    if intent in ["ask_date_time", "ask_location", "ask_victim_count", "ask_needs", "ask_impact_100k", "ask_impact_500k"]:
+        return "Program mana yang Kakak maksud? (Contoh: Banjir Demak, Pendidikan, Kesehatan, atau Lingkungan)"
+
+    # 6. Fallback Judul / Keyword matching dari Database Kampanye (Program 2)
     campaigns = get_all_campaigns()
-    prompt_lower = prompt.lower()
+    prompt_lower = text.lower()
     matched = [c for c in campaigns if any(word in c['judul'].lower() for word in prompt_lower.split() if len(word) > 3)]
     
     if matched:
@@ -426,8 +546,8 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
             response += f"   Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n"
         response += "Untuk informasi lebih lengkap, Anda bisa cek di halaman **Program Donasi** ya."
         return response
-    
-    # ── Final fallback ──
+
+    # 7. Final Fallback (Program 2)
     time_greeting = _get_time_greeting()
     fallback_responses = [
         f"Hmm... {time_greeting.lower()}, maaf ya, saya agak kesulitan menangkap maksud Anda. 🤔\n\n"
@@ -445,27 +565,31 @@ def generate_smart_response(prompt: str, chat_history: list = None) -> str:
     ]
     return random.choice(fallback_responses)
 
+# ── Streaming / Typing Effect Generator ───────────────────────────────
+def stream_text(text: str, delay_min: float = 0.01, delay_max: float = 0.04, by_char: bool = False):
+    """
+    Generator untuk efek mengetik (typing effect). 
+    Mendukung mode karakter (by_char=True dari Progam 1) maupun mode kata natural (by_char=False dari Program 2).
+    """
+    if by_char:
+        for char in text:
+            yield char
+            time.sleep(random.uniform(0.005, 0.02))
+    else:
+        for word in text.split(" "):
+            yield word + " "
+            if word.endswith(".") or word.endswith("!") or word.endswith("?") or word.endswith("\n"):
+                time.sleep(random.uniform(delay_min * 8, delay_max * 8))
+            elif word.endswith(",") or word.endswith(":"):
+                time.sleep(random.uniform(delay_min * 4, delay_max * 4))
+            else:
+                time.sleep(random.uniform(delay_min, delay_max))
 
-def stream_text(text: str, delay_min: float = 0.01, delay_max: float = 0.04):
-    """Generator untuk efek mengetik (typing effect) di Streamlit dengan jeda acak agar natural."""
-    for word in text.split(" "):
-        yield word + " "
-        # Berikan jeda lebih lama layaknya orang sedang berpikir/berhenti di tanda baca
-        if word.endswith(".") or word.endswith("!") or word.endswith("?") or word.endswith("\n"):
-            time.sleep(random.uniform(delay_min * 8, delay_max * 8))
-        elif word.endswith(",") or word.endswith(":"):
-            time.sleep(random.uniform(delay_min * 4, delay_max * 4))
-        else:
-            time.sleep(random.uniform(delay_min, delay_max))
-
-
-# ── Database helpers ──────────────────────────────────────────────────
-
-def save_chat(user_id, pertanyaan, jawaban):
-    """Simpan riwayat percakapan chatbot. (No-op karena sudah di session state messages)"""
+# ── Database Helpers ──────────────────────────────────────────────────
+def save_chat(*args, **kwargs):
+    """Simpan riwayat percakapan chatbot (No-op kompatibel dengan multi-signature)."""
     pass
 
-
 def get_chat_history(user_id=None):
-    """Ambil riwayat chatbot. (Tidak digunakan karena pakai session state)"""
+    """Ambil riwayat chatbot."""
     return []

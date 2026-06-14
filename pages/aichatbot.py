@@ -6,7 +6,6 @@ import re
 import random
 import datetime
 import json
-import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="DonasiCare AI Assistant",
@@ -163,7 +162,7 @@ def inject_css():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
-    html, body, [class*="css"], * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif !important; }
     .stApp { background: linear-gradient(160deg, #1a2e1a 0%, #0f1f0f 55%, #1c2a1a 100%) !important; }
     header[data-testid="stHeader"] { background: transparent !important; }
     .block-container { padding-top: 1rem !important; padding-left:1.5rem !important; padding-right:1.5rem !important; max-width:100% !important; }
@@ -234,6 +233,134 @@ def inject_css():
         opacity:0 !important; pointer-events:none !important;
         height:0 !important; overflow:hidden !important;
     }
+
+    /* ══ CHATBOT HEADER CARD ══ */
+    .chat-header-card {
+        background: linear-gradient(135deg, rgba(20,34,20,.8), rgba(12,22,12,.9));
+        border: .5px solid rgba(201,168,76,.25);
+        border-radius: 18px;
+        padding: 1.2rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 24px rgba(0,0,0,.25);
+    }
+    .chat-avatar-ring {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #c9a84c, #86efac);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.6rem;
+        box-shadow: 0 4px 16px rgba(201,168,76,.3);
+        flex-shrink: 0;
+    }
+    .chat-header-info h3 {
+        font-family: 'DM Serif Display', serif !important;
+        color: #f0ede6;
+        font-size: 1.3rem;
+        font-weight: 400;
+        margin: 0 0 .15rem;
+        line-height: 1.2;
+    }
+    .chat-header-info .status-line {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .status-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 6px rgba(74,222,128,.5);
+        animation: statusPulse 2s ease-in-out infinite;
+    }
+    .status-text {
+        color: #8a9e80;
+        font-size: .75rem;
+        font-weight: 500;
+    }
+    .chat-header-info .desc {
+        color: #6a7a60;
+        font-size: .72rem;
+        margin: .3rem 0 0;
+    }
+
+    @keyframes statusPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .5; transform: scale(.85); }
+    }
+
+    /* ══ CHAT BUBBLES ══ */
+    [data-testid="stChatMessage"] {
+        background: transparent !important;
+        border: none !important;
+        padding: .6rem 0 !important;
+    }
+    [data-testid="stChatMessage"][data-testid-role="assistant"] > div:last-child {
+        background: rgba(20,34,20,.6) !important;
+        border: .5px solid rgba(201,168,76,.15) !important;
+        border-radius: 2px 14px 14px 14px !important;
+        padding: .9rem 1.1rem !important;
+    }
+    [data-testid="stChatMessage"][data-testid-role="user"] > div:last-child {
+        background: rgba(201,168,76,.1) !important;
+        border: .5px solid rgba(201,168,76,.25) !important;
+        border-radius: 14px 14px 2px 14px !important;
+        padding: .9rem 1.1rem !important;
+    }
+    [data-testid="stChatMessage"] p {
+        color: #d0dcc8 !important;
+        font-size: .88rem !important;
+        line-height: 1.65 !important;
+    }
+    [data-testid="stChatMessage"] strong {
+        color: #e2c97a !important;
+    }
+
+    /* Chat container */
+    [data-testid="stVerticalBlockBorderWrapper"]:has([data-testid="stChatMessage"]) {
+        background: rgba(8,14,8,.3) !important;
+        border: .5px solid rgba(201,168,76,.08) !important;
+        border-radius: 16px !important;
+    }
+
+    /* Chat input */
+    [data-testid="stChatInput"] {
+        background: rgba(15,25,15,.7) !important;
+        border: .5px solid rgba(201,168,76,.2) !important;
+        border-radius: 14px !important;
+        padding: .2rem !important;
+    }
+    [data-testid="stChatInput"] textarea {
+        color: #d0dcc8 !important;
+        font-size: .88rem !important;
+    }
+    [data-testid="stChatInput"] button {
+        color: #c9a84c !important;
+    }
+    [data-testid="stChatInput"] button:hover {
+        background: rgba(201,168,76,.15) !important;
+    }
+
+    /* ══ QUICK REPLY CHIPS ══ */
+    .qr-label {
+        font-size: .72rem;
+        font-weight: 600;
+        color: #c9a84c;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        margin: .8rem 0 .4rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .qr-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(201,168,76,.15);
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -293,8 +420,19 @@ def tab_chatbot():
             st.switch_page("pages/donasi.py")
 
     with chat_col:
-        st.markdown("<h3 style='color:#f0ede6; font-family: \"DM Serif Display\", serif; margin-bottom: 0;'>CareBot 💬</h3>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#9aaa8a; font-size: 0.85rem; margin-top: 0;'>Asisten cerdas yang siap membantu Anda 24/7</p>", unsafe_allow_html=True)
+        st.markdown("""
+<div class="chat-header-card">
+    <div class="chat-avatar-ring">🤖</div>
+    <div class="chat-header-info">
+        <h3>CareBot</h3>
+        <div class="status-line">
+            <div class="status-dot"></div>
+            <span class="status-text">Online — Siap membantu</span>
+        </div>
+        <p class="desc">Asisten cerdas yang bisa merekomendasikan program, menjawab pertanyaan, dan membantu Anda berdonasi</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
         # ── Area Chat Scrollable (ChatGPT Style) ──
         chat_container = st.container(height=480, border=False)
@@ -331,7 +469,8 @@ def tab_chatbot():
                         intent = classify_intent(user_input)
                         show_form = (intent == "ask_how_to_donate")
 
-                        resp = generate_smart_response(user_input)
+                        # Kirim seluruh history untuk memory context
+                        resp = generate_smart_response(user_input, st.session_state.messages)
                         st.write_stream(stream_text(resp, delay_min=0.005, delay_max=0.02))
 
                         if show_form:
@@ -352,37 +491,26 @@ def tab_chatbot():
             except Exception:
                 pass
 
-        # ── Auto-scroll Hack ──
-        components.html(
-            """
-            <script>
-            var msgs = window.parent.document.querySelectorAll('.stChatMessage');
-            if (msgs.length > 0) {
-                msgs[msgs.length - 1].scrollIntoView({behavior: 'smooth', block: 'end'});
-            }
-            </script>
-            """,
-            height=0
-        )
+
 
         # ── Quick Replies ──
-        st.markdown("<p style='font-size:0.75rem;color:#c9a84c;margin-top:0.6rem;margin-bottom:0.2rem;font-weight:600;'>💡 Saran Topik:</p>", unsafe_allow_html=True)
-        c1, c2, c3, c4, c5 = st.columns([1.5, 1.5, 1.5, 1.5, 1])
+        st.markdown('<div class="qr-label">💡 Saran Topik</div>', unsafe_allow_html=True)
+        c1, c2, c3, c4, c5 = st.columns([1.4, 1.3, 1.3, 1.3, .7])
 
-        if c1.button("📊 Dana terkumpul", use_container_width=True):
+        if c1.button("📊 Dana terkumpul", use_container_width=True, key="qr1"):
             st.session_state.quick_prompt = "Berapa total dana yang sudah terkumpul?"
             st.rerun()
-        if c2.button("🎓 Pendidikan", use_container_width=True):
+        if c2.button("🎓 Pendidikan", use_container_width=True, key="qr2"):
             st.session_state.quick_prompt = "Program pendidikan apa saja yang ada?"
             st.rerun()
-        if c3.button("🤝 Jadi relawan", use_container_width=True):
+        if c3.button("🤝 Jadi relawan", use_container_width=True, key="qr3"):
             st.session_state.quick_prompt = "Bagaimana cara menjadi volunteer?"
             st.rerun()
-        if c4.button("🌿 Lingkungan", use_container_width=True):
+        if c4.button("🌿 Lingkungan", use_container_width=True, key="qr4"):
             st.session_state.quick_prompt = "Program lingkungan apa yang ada?"
             st.rerun()
         with c5:
-            if st.button("🗑️ Hapus", use_container_width=True):
+            if st.button("🗑️", use_container_width=True, key="qr_clear", help="Hapus semua percakapan"):
                 st.session_state.messages = [{"role": "assistant", "content":
                         "Halo! 👋 Saya **CareBot**, asisten AI DonasiCare.\n\nAda yang bisa dibantu?"}]
                 st.rerun()

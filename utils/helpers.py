@@ -13,11 +13,11 @@ ASSETS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
 
 # Mapping kategori ke gambar banner
 KATEGORI_IMAGE = {
-    "Pendidikan": os.path.join(ASSETS, "banner_education.png"),
-    "Kesehatan": os.path.join(ASSETS, "banner_health.png"),
-    "Bencana Alam": os.path.join(ASSETS, "banner_food.png"),
-    "Lingkungan": os.path.join(ASSETS, "banner_education.png"),
-    "Panti Asuhan": os.path.join(ASSETS, "banner_food.png"),
+    "Pendidikan": os.path.join(ASSETS, "banner_education.jpg"),
+    "Kesehatan": os.path.join(ASSETS, "banner_health.webp"),
+    "Bencana Alam": os.path.join(ASSETS, "banner_food.jpg"),
+    "Lingkungan": os.path.join(ASSETS, "banner_education.jpg"),
+    "Panti Asuhan": os.path.join(ASSETS, "banner_food.jpg"),
 }
 
 
@@ -55,7 +55,7 @@ def img_to_base64(path: str) -> str:
 
 def get_image_for_category(kategori):
     """Dapatkan path gambar banner berdasarkan kategori kampanye."""
-    return KATEGORI_IMAGE.get(kategori, os.path.join(ASSETS, "banner_food.png"))
+    return KATEGORI_IMAGE.get(kategori, os.path.join(ASSETS, "banner_food.jpg"))
 
 
 # ── Donation CRUD ──────────────────────────────────────────────────────
@@ -115,5 +115,4 @@ def get_total_donated():
 
 def get_monthly_donations():
     """Ambil total donasi bulanan untuk grafik."""
-    # Since we don't have DB, return empty list or dummy data
     return []

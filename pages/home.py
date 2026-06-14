@@ -62,7 +62,7 @@ def inject_css():
 
 /* ── Reset & Base ── */
 *, *::before, *::after { box-sizing: border-box; }
-html, body, [class*="css"], * {
+html, body, [class*="css"] {
 font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
@@ -159,84 +159,112 @@ margin: 0 auto;
 HERO
 ════════════════════════════════════════ */
 .dc-hero {
-position: relative;
-border-radius: 20px;
-overflow: hidden;
-margin: 2rem 0 0;
-box-shadow: 0 24px 80px rgba(0,0,0,.55);
-min-height: 420px;
-background: linear-gradient(135deg, #1a2e1a, #0f1f0f);
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 2rem 0 0;
+    box-shadow: 0 24px 80px rgba(0,0,0,.55);
+    height: 420px;
+    background: #080e08;
+}
+.dc-hero-slider {
+    display: flex;
+    width: 300%; /* 3 slides */
+    height: 100%;
+    animation: slide 15s infinite cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.dc-hero-slide {
+    width: 33.33333%;
+    height: 100%;
+    position: relative;
+}
+@keyframes slide {
+    0%, 28% { transform: translateX(0); }
+    33.33%, 61.33% { transform: translateX(-33.33333%); }
+    66.66%, 94.66% { transform: translateX(-66.66666%); }
+    100% { transform: translateX(0); }
 }
 .dc-hero-img {
-width: 100%; height: 420px;
-object-fit: cover; display: block;
-opacity: .65;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    opacity: .65;
 }
 .dc-hero-overlay {
-position: absolute;
-inset: 0;
-background: linear-gradient(105deg,
-rgba(8,14,8,.96) 0%,
-rgba(8,14,8,.75) 45%,
-rgba(8,14,8,.15) 100%);
-display: flex;
-flex-direction: column;
-justify-content: center;
-padding: 3rem 3.5rem;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg,
+        rgba(8,14,8,.96) 0%,
+        rgba(8,14,8,.75) 45%,
+        rgba(8,14,8,.15) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 3.5rem;
 }
 .dc-hero-eyebrow {
-font-size: .7rem; font-weight: 700; letter-spacing: .18em;
-text-transform: uppercase; color: #c9a84c;
-margin-bottom: .7rem;
-display: flex; align-items: center; gap: .5rem;
+    font-size: .7rem; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; color: #c9a84c;
+    margin-bottom: .7rem;
+    display: flex; align-items: center; gap: .5rem;
 }
 .dc-hero-eyebrow::before {
-content: ''; display: inline-block;
-width: 24px; height: 1.5px; background: #c9a84c;
+    content: ''; display: inline-block;
+    width: 24px; height: 1.5px; background: #c9a84c;
 }
 .dc-hero h1 {
-font-family: 'DM Serif Display', serif !important;
-font-size: 3.1rem !important;
-font-weight: 400 !important;
-color: #f0ede6 !important;
-line-height: 1.12 !important;
-margin: 0 0 .8rem !important;
-max-width: 520px;
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 3.1rem !important;
+    font-weight: 400 !important;
+    color: #f0ede6 !important;
+    line-height: 1.12 !important;
+    margin: 0 0 .8rem !important;
+    max-width: 520px;
 }
 .dc-hero h1 em { font-style: italic; color: #e2c97a; }
 .dc-hero-desc {
-color: #9aaa8a;
-font-size: .95rem;
-line-height: 1.75;
-max-width: 440px;
-margin-bottom: 1.75rem;
+    color: #9aaa8a;
+    font-size: .95rem;
+    line-height: 1.75;
+    max-width: 440px;
+    margin-bottom: 1.75rem;
 }
 .dc-hero-cta {
-display: inline-flex; align-items: center; gap: .5rem;
-background: linear-gradient(135deg, #c9a84c, #a8852c);
-color: #0f1a0f !important;
-padding: .8rem 2rem;
-border-radius: 12px;
-font-weight: 700; font-size: .9rem;
-text-decoration: none;
-box-shadow: 0 8px 28px rgba(201,168,76,.35);
-transition: all .22s;
-width: fit-content;
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: linear-gradient(135deg, #c9a84c, #a8852c);
+    color: #0f1a0f !important;
+    padding: .8rem 2rem;
+    border-radius: 12px;
+    font-weight: 700; font-size: .9rem;
+    text-decoration: none;
+    box-shadow: 0 8px 28px rgba(201,168,76,.35);
+    transition: all .22s;
+    width: fit-content;
 }
 .dc-hero-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(201,168,76,.5); }
 
-/* Carousel dots */
-.dc-dots {
-display: flex; gap: 7px;
-margin-top: 1.5rem;
+/* Custom Animation Indicators */
+.dc-hero-indicators {
+    position: absolute;
+    bottom: 2rem;
+    left: 3.5rem;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
 }
-.dc-dot {
-height: 6px; border-radius: 3px;
-background: rgba(255,255,255,.2);
-transition: all .3s;
-width: 22px;
+.dc-indicator {
+    width: 8px; height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,.2);
+    animation: indicate 15s infinite;
 }
-.dc-dot.on { background: #c9a84c; width: 32px; }
+.dc-indicator:nth-child(1) { animation-delay: 0s; }
+.dc-indicator:nth-child(2) { animation-delay: -10s; } /* Shifted for timing */
+.dc-indicator:nth-child(3) { animation-delay: -5s; }
+
+@keyframes indicate {
+    0%, 28% { width: 32px; background: #c9a84c; }
+    33.33%, 100% { width: 8px; background: rgba(255,255,255,.2); }
+}
 
 /* ════════════════════════════════════════
 SECTION HEADER
@@ -276,10 +304,10 @@ transition: gap .2s;
 STAT CARDS
 ════════════════════════════════════════ */
 .dc-stats {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 1rem;
-margin-bottom: .5rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: .5rem;
 }
 .dc-stat {
 background: rgba(15,25,15,.7);
@@ -315,9 +343,9 @@ line-height: 1.1; margin-bottom: .2rem;
 PROGRAM CARDS
 ════════════════════════════════════════ */
 .dc-programs {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
 }
 .dc-prog {
 background: rgba(12,20,12,.65);
@@ -417,9 +445,9 @@ font-family: 'DM Serif Display',serif !important; }
 TESTIMONIALS
 ════════════════════════════════════════ */
 .dc-testi {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
 }
 .dc-testi-card {
 background: rgba(12,20,12,.65);
@@ -629,49 +657,39 @@ def render_navbar():
 # HERO BANNER
 # ══════════════════════════════════════════════════════════════════════
 BANNERS = [
-    {"key": "banner_food.png",
+    {"key": "banner_food.jpg",
      "title": "Bantuan Pangan<br>untuk <em>Sesama</em>",
      "desc": "Distribusi paket sembako untuk keluarga yang membutuhkan di seluruh pelosok Indonesia. Setiap donasi Anda memberi harapan baru.",
      "emoji": "🍚"},
-    {"key": "banner_education.png",
+    {"key": "banner_education.jpg",
      "title": "Pendidikan untuk<br><em>Masa Depan</em>",
      "desc": "Bantu anak-anak Indonesia mendapatkan akses pendidikan yang layak. Donasi perlengkapan sekolah dan beasiswa.",
      "emoji": "📚"},
-    {"key": "banner_health.png",
+    {"key": "banner_health.webp",
      "title": "Kesehatan untuk<br><em>Semua</em>",
      "desc": "Program kesehatan gratis di daerah terpencil. Bersama kita wujudkan Indonesia yang lebih sehat.",
      "emoji": "🏥"},
 ]
 
 def render_hero():
-    if "banner_idx" not in st.session_state:
-        st.session_state.banner_idx = 0
-    idx = st.session_state.banner_idx
-    b = BANNERS[idx]
-
-    # Try to load image
-    img_path = os.path.join(ASSETS, b["key"])
-    img_tag = ""
-    has_img = os.path.exists(img_path)
-    if has_img:
-        b64 = img_to_base64(img_path)
-        if b64:
-            img_tag = f'<img class="dc-hero-img" src="{b64}" alt="banner" />'
-
-    placeholder_bg = ["linear-gradient(135deg,#1a2e1a,#2d4a1a)",
+    slides_html = ""
+    for i, b in enumerate(BANNERS):
+        img_path = os.path.join(ASSETS, b["key"])
+        img_tag = ""
+        has_img = os.path.exists(img_path)
+        if has_img:
+            b64 = img_to_base64(img_path)
+            if b64:
+                img_tag = f'<img class="dc-hero-img" src="{b64}" alt="banner" />'
+        
+        bg_fallback = ["linear-gradient(135deg,#1a2e1a,#2d4a1a)",
                        "linear-gradient(135deg,#1a2044,#0e2d5e)",
-                       "linear-gradient(135deg,#2e1a1a,#4a1a2d)"][idx]
-
-    dots_html = "".join(
-        f'<div class="dc-dot {"on" if i == idx else ""}"></div>'
-        for i in range(len(BANNERS))
-    )
-
-    # Placeholder emoji if no image
-    overlay_extra = "" if has_img else f'<div style="position:absolute;right:3rem;top:50%;transform:translateY(-50%);font-size:7rem;opacity:.18;">{b["emoji"]}</div>'
-
-    st.markdown(f"""
-<div class="dc-hero" style="{'background:'+placeholder_bg if not has_img else ''}">
+                       "linear-gradient(135deg,#2e1a1a,#4a1a2d)"][i]
+        
+        overlay_extra = "" if has_img else f'<div style="position:absolute;right:3rem;top:50%;transform:translateY(-50%);font-size:7rem;opacity:.18;">{b["emoji"]}</div>'
+        
+        slides_html += f"""
+<div class="dc-hero-slide" style="{'background:'+bg_fallback if not has_img else ''}">
 {img_tag}
 {overlay_extra}
 <div class="dc-hero-overlay">
@@ -681,21 +699,22 @@ def render_hero():
 <a class="dc-hero-cta" href="donasi" target="_self">
 💛 Donasi Sekarang
 </a>
-<div class="dc-dots">{dots_html}</div>
+</div>
+</div>
+"""
+
+    st.markdown(f"""
+<div class="dc-hero">
+<div class="dc-hero-slider">
+{slides_html}
+</div>
+<div class="dc-hero-indicators">
+<div class="dc-indicator" style="animation-delay: 0s;"></div>
+<div class="dc-indicator" style="animation-delay: 5s;"></div>
+<div class="dc-indicator" style="animation-delay: 10s;"></div>
 </div>
 </div>
 """, unsafe_allow_html=True)
-
-    # Carousel nav
-    c1, c2, c3 = st.columns([1, 8, 1])
-    with c1:
-        if st.button("◀", key="prev_b", use_container_width=True):
-            st.session_state.banner_idx = (idx - 1) % len(BANNERS)
-            st.rerun()
-    with c3:
-        if st.button("▶", key="next_b", use_container_width=True):
-            st.session_state.banner_idx = (idx + 1) % len(BANNERS)
-            st.rerun()
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -731,16 +750,17 @@ def render_stats():
         ("🌍", "34", "Provinsi Terjangkau"),
     ]
 
-    st.markdown('<div class="dc-stats">', unsafe_allow_html=True)
+    stats_html = '<div class="dc-stats">'
     for icon, num, label in stats:
-        st.markdown(f"""
+        stats_html += f"""
 <div class="dc-stat">
 <span class="dc-stat-icon">{icon}</span>
 <div class="dc-stat-num">{num}</div>
 <div class="dc-stat-label">{label}</div>
 </div>
-""", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+"""
+    stats_html += '</div>'
+    st.markdown(stats_html, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -780,7 +800,7 @@ def render_programs():
     campaigns = get_all_campaigns()
     top3 = sorted(campaigns, key=lambda c: c.get("dana_terkumpul", 0), reverse=True)[:3]
 
-    st.markdown('<div class="dc-programs">', unsafe_allow_html=True)
+    prog_html = '<div class="dc-programs">'
     for prog in top3:
         cat   = prog.get("kategori", "")
         badge = BADGE_MAP.get(cat, "badge-ekonomi")
@@ -802,7 +822,7 @@ def render_programs():
         if not img_html:
             img_html = f'<div class="dc-prog-img-placeholder" style="background:{bg};">{emoji}</div>'
 
-        st.markdown(f"""
+        prog_html += f"""
 <div class="dc-prog">
 {img_html}
 <div class="dc-prog-body">
@@ -820,8 +840,9 @@ Terkumpul <strong>{format_rupiah(prog['dana_terkumpul'])}</strong>
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+"""
+    prog_html += '</div>'
+    st.markdown(prog_html, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -892,9 +913,9 @@ def render_testimonials():
          "name":"Rizky Pratama","role":"Volunteer aktif","bg":"#f472b6","ini":"RP"},
     ]
 
-    st.markdown('<div class="dc-testi">', unsafe_allow_html=True)
+    testi_html = '<div class="dc-testi">'
     for t in testi:
-        st.markdown(f"""
+        testi_html += f"""
 <div class="dc-testi-card">
 <div class="dc-testi-quote">"</div>
 <div class="dc-testi-stars">★★★★★</div>
@@ -907,8 +928,9 @@ def render_testimonials():
 </div>
 </div>
 </div>
-""", unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+"""
+    testi_html += '</div>'
+    st.markdown(testi_html, unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════════════════════
