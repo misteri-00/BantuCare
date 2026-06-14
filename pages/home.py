@@ -12,7 +12,7 @@ try:
 except ImportError:
     UTILS_OK = False
 
-# ── Fallbacks ──────────────────────────────────────────────────────────
+
 def format_rupiah(amount):
     return "Rp {:,}".format(int(amount)).replace(",", ".")
 def calc_progress(a, b):
@@ -41,9 +41,7 @@ def img_to_base64(path):
         return None
 
 
-# ══════════════════════════════════════════════════════════════════════
-# PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════
+
 st.set_page_config(
     page_title="DonasiCare — Berikan Harapan",
     page_icon="💚",
@@ -52,9 +50,7 @@ st.set_page_config(
 )
 
 
-# ══════════════════════════════════════════════════════════════════════
-# CSS — Forest Luxury · DM Serif + Plus Jakarta Sans
-# ══════════════════════════════════════════════════════════════════════
+
 def inject_css():
     st.markdown("""
 <style>
@@ -845,9 +841,6 @@ Terkumpul <strong>{format_rupiah(prog['dana_terkumpul'])}</strong>
     st.markdown(prog_html, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════
-# IMPACT DISTRIBUTION
-# ══════════════════════════════════════════════════════════════════════
 def render_distribution():
     st.markdown("""
 <div class="dc-sec">
@@ -889,9 +882,6 @@ def render_distribution():
 """, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════
-# TESTIMONIALS
-# ══════════════════════════════════════════════════════════════════════
 def render_testimonials():
     st.markdown("""
 <div class="dc-sec">
@@ -956,9 +946,7 @@ harapan nyata bagi mereka yang membutuhkan.
                 st.info("Menuju halaman donasi…")
 
 
-# ══════════════════════════════════════════════════════════════════════
-# FOOTER — 4 kolom seperti referensi gambar
-# ══════════════════════════════════════════════════════════════════════
+
 def render_footer():
     st.markdown("""
 <div class="dc-footer-wrap">
@@ -1053,14 +1041,11 @@ Dibuat dengan 💚 untuk Indonesia yang lebih baik
 """, unsafe_allow_html=True)
 
 
-# ══════════════════════════════════════════════════════════════════════
-# MAIN
-# ══════════════════════════════════════════════════════════════════════
+
 def main():
     inject_css()
     render_navbar()
 
-    # Konten utama — padding seragam 3rem kiri-kanan, max-width terpusat
     st.markdown('<div class="dc-page">', unsafe_allow_html=True)
     render_hero()
     render_stats()
@@ -1070,7 +1055,6 @@ def main():
     render_cta()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Footer di luar dc-page agar full-width dengan padding sendiri
     render_footer()
 
 
