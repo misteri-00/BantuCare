@@ -1,31 +1,36 @@
-from utils.database import get_connection
+import streamlit as st
+import datetime
 
 # ═══════════════════════════════════════════════════════════════════════
-# Volunteer CRUD helpers
+# Volunteer CRUD helpers (Static Data Version)
 # ═══════════════════════════════════════════════════════════════════════
 
 def register_volunteer(nama, email, no_hp, event):
-    """Daftarkan volunteer baru ke database."""
-    conn = get_connection()
-    conn.execute(
-        "INSERT INTO volunteers (nama, email, no_hp, event) VALUES (?, ?, ?, ?)",
-        (nama, email, no_hp, event)
-    )
-    conn.commit()
-    conn.close()
+    """Daftarkan volunteer baru ke session state."""
+    if "volunteers" not in st.session_state:
+        st.session_state["volunteers"] = []
+        
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    new_vol = {
+        "id": len(st.session_state["volunteers"]) + 1,
+        "nama": nama,
+        "email": email,
+        "no_hp": no_hp,
+        "event": event,
+        "tanggal_daftar": now_str
+    }
+    
+    st.session_state["volunteers"].append(new_vol)
 
 
 def get_all_volunteers():
-    """Ambil semua data volunteer."""
-    conn = get_connection()
-    rows = conn.execute("SELECT * FROM volunteers ORDER BY tanggal_daftar DESC").fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    """Ambil semua data volunteer dari session state."""
+    return sorted(st.session_state.get("volunteers", []), key=lambda x: x["tanggal_daftar"], reverse=True)
 
 
 def get_volunteer_count():
-    """Hitung jumlah volunteer terdaftar."""
-    conn = get_connection()
-    row = conn.execute("SELECT COUNT(*) FROM volunteers").fetchone()
-    conn.close()
-    return row[0]
+    """Hitung jumlah volunteer terdaftar (base stat + session)."""
+    base_count = 1250  # Dummy base count
+    session_count = len(st.session_state.get("volunteers", []))
+    return base_count + session_count

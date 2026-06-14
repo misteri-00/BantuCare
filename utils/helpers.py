@@ -1,10 +1,12 @@
 import os
 import base64
 from pathlib import Path
-from utils.database import get_connection
+import streamlit as st
+import datetime
+from utils.campaign import get_campaign_by_id
 
 # ═══════════════════════════════════════════════════════════════════════
-# General helpers
+# General helpers (Static Data Version)
 # ═══════════════════════════════════════════════════════════════════════
 
 ASSETS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets")
@@ -59,58 +61,59 @@ def get_image_for_category(kategori):
 # ── Donation CRUD ──────────────────────────────────────────────────────
 
 def save_donation(user_id, campaign_id, nominal, metode, anonim, bukti, pesan=""):
-    """Simpan transaksi donasi ke database dan update dana kampanye."""
-    conn = get_connection()
-    conn.execute(
-        """INSERT INTO donations (user_id, campaign_id, nominal, metode_pembayaran, anonim, bukti_transfer, pesan)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (user_id, campaign_id, nominal, metode, 1 if anonim else 0, bukti, pesan)
-    )
-    conn.execute(
-        "UPDATE campaigns SET dana_terkumpul = dana_terkumpul + ? WHERE id = ?",
-        (nominal, campaign_id)
-    )
-    conn.commit()
-    conn.close()
+    """Simpan transaksi donasi ke session state."""
+    if "donations" not in st.session_state:
+        st.session_state["donations"] = []
+        
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    new_donation = {
+        "id": len(st.session_state["donations"]) + 1,
+        "user_id": user_id,
+        "campaign_id": campaign_id,
+        "nominal": nominal,
+        "metode_pembayaran": metode,
+        "anonim": 1 if anonim else 0,
+        "bukti_transfer": bukti,
+        "pesan": pesan,
+        "tanggal_donasi": now_str
+    }
+    
+    st.session_state["donations"].append(new_donation)
 
 
 def get_all_donations():
-    """Ambil semua riwayat donasi beserta nama kampanye."""
-    conn = get_connection()
-    rows = conn.execute("""
-        SELECT d.*, c.judul as program_judul
-        FROM donations d
-        LEFT JOIN campaigns c ON d.campaign_id = c.id
-        ORDER BY d.tanggal_donasi DESC
-    """).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    """Ambil semua riwayat donasi beserta nama kampanye dari session state."""
+    if "donations" not in st.session_state:
+        return []
+        
+    donations = st.session_state["donations"]
+    result = []
+    
+    for d in sorted(donations, key=lambda x: x["tanggal_donasi"], reverse=True):
+        d_copy = dict(d)
+        campaign = get_campaign_by_id(d["campaign_id"])
+        d_copy["program_judul"] = campaign["judul"] if campaign else "Program Donasi"
+        result.append(d_copy)
+        
+    return result
 
 
 def get_donation_count():
-    """Hitung jumlah donasi."""
-    conn = get_connection()
-    row = conn.execute("SELECT COUNT(*) FROM donations").fetchone()
-    conn.close()
-    return row[0]
+    """Hitung jumlah donasi (base stat + session)."""
+    # Assuming around 150 previous donations + new ones in session
+    base_count = 150
+    session_count = len(st.session_state.get("donations", []))
+    return base_count + session_count
 
 
 def get_total_donated():
     """Total nominal seluruh donasi."""
-    conn = get_connection()
-    row = conn.execute("SELECT COALESCE(SUM(nominal), 0) FROM donations").fetchone()
-    conn.close()
-    return row[0]
+    from utils.campaign import get_total_donasi
+    return get_total_donasi()
 
 
 def get_monthly_donations():
     """Ambil total donasi bulanan untuk grafik."""
-    conn = get_connection()
-    rows = conn.execute("""
-        SELECT strftime('%Y-%m', tanggal_donasi) as bulan, SUM(nominal) as total
-        FROM donations
-        GROUP BY bulan
-        ORDER BY bulan ASC
-    """).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    # Since we don't have DB, return empty list or dummy data
+    return []

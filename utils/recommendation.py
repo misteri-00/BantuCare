@@ -1,7 +1,7 @@
-from utils.database import get_connection
+from utils.campaign import get_all_campaigns
 
 # ═══════════════════════════════════════════════════════════════════════
-# Recommendation helpers
+# Recommendation helpers (Static Data Version)
 # ═══════════════════════════════════════════════════════════════════════
 
 # Mapping minat user ke kategori kampanye
@@ -16,17 +16,17 @@ MINAT_TO_KATEGORI = {
 
 def get_recommendations(minat_list):
     """Berikan rekomendasi kampanye berdasarkan daftar minat user."""
-    conn = get_connection()
+    all_campaigns = get_all_campaigns()
     results = []
+    
     for minat in minat_list:
         kategori = MINAT_TO_KATEGORI.get(minat)
         if kategori:
-            rows = conn.execute(
-                "SELECT * FROM campaigns WHERE kategori = ? AND status = 'Aktif' ORDER BY dana_terkumpul DESC LIMIT 2",
-                (kategori,)
-            ).fetchall()
-            results.extend([dict(r) for r in rows])
-    conn.close()
+            # Filter by category and take top 2 by dana_terkumpul
+            filtered = [c for c in all_campaigns if c['kategori'] == kategori and c['status'] == 'Aktif']
+            sorted_filtered = sorted(filtered, key=lambda x: x['dana_terkumpul'], reverse=True)[:2]
+            results.extend(sorted_filtered)
+            
     # Hilangkan duplikat berdasarkan id
     seen = set()
     unique = []
@@ -34,4 +34,5 @@ def get_recommendations(minat_list):
         if r["id"] not in seen:
             seen.add(r["id"])
             unique.append(r)
+            
     return unique

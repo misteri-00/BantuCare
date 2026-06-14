@@ -2,7 +2,6 @@ import re
 import time
 import random
 import datetime
-from utils.database import get_connection
 from utils.campaign import get_all_campaigns, get_total_donasi, get_campaign_count, get_campaigns_by_category
 from utils.helpers import format_rupiah, get_donation_count
 
@@ -463,25 +462,10 @@ def stream_text(text: str, delay_min: float = 0.01, delay_max: float = 0.04):
 # ── Database helpers ──────────────────────────────────────────────────
 
 def save_chat(user_id, pertanyaan, jawaban):
-    """Simpan riwayat percakapan chatbot ke database."""
-    conn = get_connection()
-    conn.execute(
-        "INSERT INTO chatbot_history (user_id, pertanyaan, jawaban) VALUES (?, ?, ?)",
-        (user_id, pertanyaan, jawaban)
-    )
-    conn.commit()
-    conn.close()
+    """Simpan riwayat percakapan chatbot. (No-op karena sudah di session state messages)"""
+    pass
 
 
 def get_chat_history(user_id=None):
-    """Ambil riwayat chatbot, opsional filter berdasarkan user."""
-    conn = get_connection()
-    if user_id:
-        rows = conn.execute(
-            "SELECT * FROM chatbot_history WHERE user_id = ? ORDER BY created_at DESC",
-            (user_id,)
-        ).fetchall()
-    else:
-        rows = conn.execute("SELECT * FROM chatbot_history ORDER BY created_at DESC").fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+    """Ambil riwayat chatbot. (Tidak digunakan karena pakai session state)"""
+    return []
