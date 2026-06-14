@@ -67,97 +67,169 @@ DETAILED_PROGRAMS = {
 # ── Intent Patterns ───────────────────────────────────────────────────
 INTENT_PATTERNS = {
     "greeting": [
-        r"\b(halo|hai|hi|hey|selamat|assalamualaikum|pagi|siang|sore|malam|helo)\b"
+        r"\b(halo|hai|hi|hey|helo|assalamualaikum)\b",
+        r"\b(selamat|pagi|siang|sore|malam)\b"
     ],
     "farewell": [
-        r"\b(bye|dadah|sampai jumpa|terima kasih|makasih|thanks|selamat tinggal)\b"
+        r"\b(bye|dadah|sampai jumpa|selamat tinggal)\b",
+        r"\b(terima kasih|makasih|thanks|thank you|suwun)\b"
     ],
     
-    # Detail Program Utama (Program 1)
-    "ask_disaster_detail": [r"\b(banjir demak)\b", r"(detail|info).*(banjir demak)"],
-    "ask_education_detail": [r"(program|bantuan).*(pendidikan|beasiswa|sekolah)"],
-    "ask_health_detail": [r"(program|bantuan).*(kesehatan|medis|pengobatan|sakit)"],
-    "ask_environment_detail": [r"(program|bantuan).*(lingkungan|penghijauan|pohon|alam)"],
+    # ── Detail Program Utama (Program Static) ───────────────────────────
+    "ask_disaster_detail": [
+        r"\b(banjir demak)\b", 
+        r"detail.*banjir", 
+        r"info.*banjir", 
+        r"tentang.*banjir.*demak"
+    ],
+    "ask_education_detail": [
+        r"(program|bantuan|detail|info).*(pendidikan|beasiswa|sekolah)",
+        r"(pendidikan|beasiswa|sekolah).*(program|bantuan|detail|info)",
+        r"tentang.*(pendidikan|beasiswa|sekolah)"
+    ],
+    "ask_health_detail": [
+        r"(program|bantuan|detail|info).*(kesehatan|medis|pengobatan|sakit)",
+        r"(kesehatan|medis|pengobatan|sakit).*(program|bantuan|detail|info)",
+        r"tentang.*(kesehatan|medis|pengobatan|sakit)"
+    ],
+    "ask_environment_detail": [
+        r"(program|bantuan|detail|info).*(lingkungan|penghijauan|pohon|alam)",
+        r"(lingkungan|penghijauan|pohon|alam).*(program|bantuan|detail|info)",
+        r"tentang.*(lingkungan|penghijauan|pohon|alam)"
+    ],
     
-    # Pertanyaan Kontekstual Program (Program 1)
-    "ask_date_time": [r"(kapan).*(terjadi|kejadian|mulai)", r"(tanggal|waktu).*(berapa|kejadian)"],
-    "ask_location": [r"(dimana|di mana|wilayah mana|lokasi).*(terdampak|kejadian)"],
-    "ask_victim_count": [r"(berapa).*(korban|jiwa|terdampak|orang|anak|siswa)"],
-    "ask_needs": [r"(apa).*(kebutuhan|dibutuhkan|mendesak)"],
-    "ask_impact_100k": [r"(kalau|jika).*(donasi|nyumbang|sumbang).*(100|seratus).*(ribu)"],
-    "ask_impact_500k": [r"(kalau|jika).*(donasi|nyumbang|sumbang).*(500|lima ratus).*(ribu)"],
+    # ── Pertanyaan Kontekstual Program (Mendukung Follow-up Pendek) ──
+    "ask_date_time": [
+        r"\bkapan\b",
+        r"\b(tanggal|waktu|hari|jam)\b",
+        r"kapan.*(terjadi|mulai|kejadian)",
+        r"(tanggal|waktu).*(kejadian|mulai)"
+    ],
+    "ask_location": [
+        r"\b(dimana|di mana|mana|lokasi|wilayah|tempat|daerah)\b",
+        r"lokasi.*terdampak",
+        r"di.*mana.*kejadian"
+    ],
+    "ask_victim_count": [
+        r"\bberapa\b.*\b(korban|jiwa|orang|anak|siswa|keluarga|pengungsi|pasien)\b",
+        r"\bjumlah\b.*\b(korban|jiwa|orang|anak|siswa|keluarga|pengungsi|pasien)\b",
+        r"\b(berapa|jumlah)\s+(korban|jiwa|terdampak|pengungsi)\b",
+        r"\b(korban|jiwa|pengungsi|penerima manfaat)\b"
+    ],
+    "ask_needs": [
+        r"\b(kebutuhan|dibutuhkan|perlu|diperlukan|mendesak|logistik)\b",
+        r"butuh\s+apa",
+        r"apa\s+saja\s+yang\s+diperlukan"
+    ],
     
-    # Statistik & Kategori Kampanye Dinamis (Program 2)
+    # ── Simulasi Dampak Berdasarkan Nominal (Score-Boosted) ────────────
+    "ask_impact_100k": [
+        r"\b100(\.000)?\b",
+        r"100\s*(ribu|rb)",
+        r"seratus\s*ribu",
+        r"donasi.*100",
+        r"dampak.*100",
+        r"bantuan.*100"
+    ],
+    "ask_impact_500k": [
+        r"\b500(\.000)?\b",
+        r"500\s*(ribu|rb)",
+        r"lima\s*ratus\s*ribu",
+        r"donasi.*500",
+        r"dampak.*500",
+        r"bantuan.*500"
+    ],
+    "ask_impact_simulation": [
+        r"(jika|kalau|misal|seandainya|dampak|manfaat|bantuan).*(donasi|berdonasi|menyumbang|sumbang).*(rp|Rp)?\s*(\d+)",
+        r"(rp|Rp)\s*\d+",
+        r"\b\d+\s*(ribu|rb|juta|jt)\b",
+        r"nominal.*\d+"
+    ],
+
+    # ── Statistik & Kategori Kampanye Dinamis ──────────────────────────
     "ask_total_donation": [
         r"(total|berapa|jumlah).*(donasi|dana|uang|terkumpul|sumbangan)",
-        r"(dana|donasi|uang).*(terkumpul|masuk|diterima|total)",
-        r"sudah (berapa|terkumpul)",
+        r"(dana|donasi|uang|sumbangan).*(terkumpul|masuk|diterima|total)",
+        r"sudah\s+(berapa|terkumpul)",
+        r"total\s+dana"
     ],
     "ask_program_count": [
-        r"(berapa|jumlah|ada).*(program|kampanye|kegiatan|proyek)",
-        r"(program|kampanye).*(berapa|aktif|jumlah|banyak)",
+        r"(berapa|jumlah|ada|daftar).*(program|kampanye|kegiatan|proyek|opsi)",
+        r"(program|kampanye|kegiatan|proyek).*(berapa|aktif|jumlah|banyak)",
+        r"berapa\s+program",
+        r"jumlah\s+kampanye"
     ],
     "ask_donor_count": [
         r"(berapa|jumlah|ada).*(donatur|penyumbang|orang|donor)",
         r"(donatur|penyumbang|donor).*(berapa|jumlah|banyak)",
+        r"berapa\s+donatur",
+        r"jumlah\s+penyumbang"
     ],
+    
+    # Intent khusus mencari kategori dinamis (Diwajibkan ada keyword pencarian)
     "search_education": [
-        r"\b(pendidikan|sekolah|beasiswa|belajar|buku|anak|pelajar|murid|siswa)\b",
+        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(pendidikan|sekolah|beasiswa|belajar|siswa)",
+        r"(pendidikan|sekolah|beasiswa|belajar|siswa).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
+        r"kategori\s+pendidikan"
     ],
     "search_health": [
-        r"\b(kesehatan|medis|sakit|obat|rumah sakit|klinik|dokter|gizi|nutrisi)\b",
+        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(kesehatan|medis|sakit|obat|dokter|klinik)",
+        r"(kesehatan|medis|sakit|obat|dokter|klinik).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
+        r"kategori\s+kesehatan"
     ],
     "search_disaster": [
-        r"\b(bencana|banjir|gempa|longsor|tsunami|kebakaran|erupsi|badai|topan)\b",
+        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(bencana|banjir|gempa|longsor|kebakaran)",
+        r"(bencana|banjir|gempa|longsor|kebakaran).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
+        r"kategori\s+(bencana|alam)"
     ],
     "search_environment": [
-        r"\b(lingkungan|hutan|mangrove|reboisasi|sampah|polusi|laut|pantai|alam)\b",
+        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(lingkungan|hutan|mangrove|sampah|alam)",
+        r"(lingkungan|hutan|mangrove|sampah|alam).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
+        r"kategori\s+lingkungan"
     ],
+    
+    # ── Prosedur Platform & Informasi Umum ─────────────────────────────
     "ask_how_to_donate": [
-        r"(cara|gimana|bagaimana|langkah|step|panduan).*(donasi|bayar|sumbang|transfer|bantu)",
-        r"(donasi|bayar|sumbang).*(cara|gimana|bagaimana)",
-        r"metode.*(pembayaran|bayar|donasi)",
-        r"(bisa|mau|ingin|pengen).*(donasi|sumbang|bantu|bayar|berdonasi|menyumbang)",
-        r"\b(berdonasi|menyumbang)\b",
+        r"(cara|gimana|bagaimana|langkah|step|panduan).*(donasi|bayar|sumbang|transfer|bantu|berdonasi)",
+        r"(donasi|bayar|sumbang|transfer|berdonasi).*(cara|gimana|bagaimana|langkah|panduan)",
+        r"(bisa|mau|ingin|pengen|cara).*(donasi|sumbang|bantu|bayar|berdonasi|menyumbang)",
+        r"prosedur.*(donasi|menyumbang)"
     ],
     "ask_payment_method": [
-        r"(metode|jenis|apa saja).*(bayar|pembayaran|transfer)",
-        r"\b(gopay|ovo|dana|qris|bca|mandiri|bni|bri)\b",
-        r"(bayar|transfer).*(apa|pakai|lewat|via|melalui)",
+        r"(metode|jenis|pilihan|opsi|apa saja).*(bayar|pembayaran|transfer)",
+        r"(bayar|pembayaran|transfer).*(metode|jenis|pilihan|pake|pakai|lewat|via|melalui)",
+        r"\b(gopay|ovo|dana|qris|bca|mandiri|bni|bri|linkaja|shopeepay|transfer)\b"
     ],
     "ask_transparency": [
-        r"(transparan|laporan|bukti|audit|akuntabel|jujur)",
-        r"(dana|uang|donasi).*(digunakan|disalurkan|dipakai|kemana|ke mana)",
-        r"(kemana|ke mana).*(uang|dana|donasi)",
+        r"(transparan|laporan|bukti|audit|akuntabel|jujur|terbuka)",
+        r"(dana|uang|donasi).*(digunakan|disalurkan|dipakai|kemana|ke mana|larinya)",
+        r"(kemana|ke mana).*(uang|dana|donasi|penyaluran)"
     ],
     "ask_security": [
-        r"(aman|keamanan|terpercaya|penipuan|bodong|percaya)",
-    ],
-    "ask_impact_simulation": [
-        r"(jika|kalau|misal|seandainya).*(donasi|berdonasi|menyumbang|sumbang).*(rp|Rp)?\s*(\d+|\d{1,3}(?:\.\d{3})+)",
-        r"(dampak|manfaat|bantuan|apa).*(donasi|berdonasi|menyumbang|sumbang).*(rp|Rp)?\s*(\d+|\d{1,3}(?:\.\d{3})+)",
+        r"(aman|keamanan|terpercaya|penipuan|bodong|percaya|legal|resmi|izin)",
+        r"apakah.*(aman|penipuan|beneran)"
     ],
     "ask_volunteer": [
-        r"\b(volunteer|relawan|sukarelawan|gabung|daftar|bergabung)\b",
-        r"(jadi|mau|ingin|pengen).*(relawan|volunteer)",
+        r"\b(volunteer|relawan|sukarelawan)\b",
+        r"(jadi|mau|ingin|pengen|gabung|daftar|bergabung).*(relawan|volunteer|sukarelawan)",
+        r"cara.*(jadi|gabung).*relawan"
     ],
     "ask_about": [
-        r"(apa itu|tentang|mengenai|jelaskan).*(donasicare|platform|organisasi|yayasan)",
-        r"(siapa|apa).*(donasicare|kalian|kamu|anda)",
+        r"(apa itu|tentang|mengenai|jelaskan|profil).*(donasicare|platform|organisasi|yayasan|apps|aplikasi)",
+        r"(siapa|apa).*(donasicare|kalian|kamu|anda|carebot)"
     ],
     "ask_recommendation": [
-        r"(rekomendasi|rekomen|saran|sarankan|suggest)",
-        r"(program|kampanye).*(terbaik|populer|unggulan|favorit|bagus)",
-        r"(mau|ingin|pengen).*(donasi|bantu|sumbang).*(apa|mana|kemana)",
+        r"(rekomendasi|rekomen|saran|sarankan|suggest|rekomendasikan)",
+        r"(program|kampanye|donasi).*(terbaik|populer|unggulan|favorit|bagus|mendesak)",
+        r"(mau|ingin|pengen).*(donasi|bantu|sumbang).*(apa|mana|kemana|ke mana)"
     ],
     "positive_sentiment": [
-        r"\b(bagus|keren|mantap|hebat|luar biasa|amazing|wow|good|great|suka|senang)\b",
+        r"\b(bagus|keren|mantap|hebat|luar biasa|amazing|wow|good|great|suka|senang|terbantu)\b"
     ],
     "negative_sentiment": [
-        r"\b(jelek|buruk|mengecewakan|kecewa|tidak suka|benci|marah|kesal)\b",
+        r"\b(jelek|buruk|mengecewakan|kecewa|tidak suka|benci|marah|kesal|lelet|lambat|error|bug)\b"
     ],
 }
-
 def classify_intent(text: str) -> str:
     """Klasifikasikan intent dari teks pengguna menggunakan regex pattern matching."""
     text_lower = text.lower().strip()
