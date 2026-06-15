@@ -85,7 +85,7 @@ backdrop-filter: blur(24px);
 -webkit-backdrop-filter: blur(24px);
 border-bottom: 1px solid rgba(201,168,76,.14);
 padding: 0 1rem;
-height: 64px;
+height: 110px;
 display: flex;
 align-items: center;
 justify-content: space-between;
@@ -100,13 +100,9 @@ gap: .65rem;
 text-decoration: none;
 }
 .dc-nav-logo {
-width: 38px; height: 38px;
-background: linear-gradient(135deg, #c9a84c, #e2c97a);
-border-radius: 10px;
-display: flex; align-items: center; justify-content: center;
-font-size: 1.1rem;
-box-shadow: 0 4px 16px rgba(201,168,76,.28);
+height: 90px; width: auto;
 flex-shrink: 0;
+object-fit: contain;
 }
 .dc-nav-name {
 font-family: 'DM Serif Display', serif !important;
@@ -630,11 +626,14 @@ box-shadow: 0 10px 32px rgba(201,168,76,.45) !important;
 # NAVBAR
 # ══════════════════════════════════════════════════════════════════════
 def render_navbar():
-    st.markdown("""
+    logo_path = os.path.join(ASSETS, "logo.png")
+    logo_b64 = img_to_base64(logo_path)
+    logo_src = logo_b64 if logo_b64 else "/assets/logo.png"
+
+    st.markdown(f"""
 <nav class="dc-nav">
   <a class="dc-nav-brand" href="#">
-    <img class="dc-nav-logo" src="/assets/erasebg-transformed-1.png" alt="Logo DonasiCare">
-    <span class="dc-nav-name">DonasiCare</span>
+    <img class="dc-nav-logo" src="{logo_src}" alt="Logo DonasiCare">
   </a>
 <nav class="dc-nav-links">
 <a href="home"         class="active" target="_self">Beranda</a>

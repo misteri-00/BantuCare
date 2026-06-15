@@ -381,9 +381,10 @@ def tab_chatbot():
     # Init session state
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content":
-            "Halo! 👋 Saya **CareBot**, asisten AI DonasiCare.\n\n"
-            "Saya bisa merekomendasikan program donasi, menjawab seputar penyaluran dana, "
-            "atau membantu Anda menjadi relawan. Ada yang bisa dibantu?"}]
+            "Halo, Kak! 👋 Saya **CareBot**, asisten AI DonasiCare.\n\n"
+            "Setiap kebaikan kecil sangat berarti bagi mereka yang membutuhkan. "
+            "Kira-kira, program donasi seperti apa yang sedang Kakak cari hari ini? "
+            "Apakah Kakak tertarik pada program pendidikan, kesehatan, lingkungan, atau mungkin bantuan bencana alam?"}]
     if "keranjang" not in st.session_state:
         st.session_state.keranjang = []
     if "quick_prompt" not in st.session_state:
@@ -512,7 +513,10 @@ def tab_chatbot():
         with c5:
             if st.button("🗑️", use_container_width=True, key="qr_clear", help="Hapus semua percakapan"):
                 st.session_state.messages = [{"role": "assistant", "content":
-                        "Halo! 👋 Saya **CareBot**, asisten AI DonasiCare.\n\nAda yang bisa dibantu?"}]
+                        "Halo, Kak! 👋 Saya **CareBot**, asisten AI DonasiCare.\n\n"
+                        "Setiap kebaikan kecil sangat berarti bagi mereka yang membutuhkan. "
+                        "Kira-kira, program donasi seperti apa yang sedang Kakak cari hari ini? "
+                        "Apakah Kakak tertarik pada program pendidikan, kesehatan, lingkungan, atau mungkin bantuan bencana alam?"}]
                 st.rerun()
 
 

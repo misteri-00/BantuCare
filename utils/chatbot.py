@@ -197,7 +197,7 @@ INTENT_PATTERNS = {
     ],
     "ask_payment_method": [
         r"(metode|jenis|pilihan|opsi|apa saja).*(bayar|pembayaran|transfer)",
-        r"(bayar|pembayaran|transfer).*(metode|jenis|pilihan|pake|pakai|lewat|via|melalui)",
+        r"(pay|pembayaran|transfer).*(metode|jenis|pilihan|pake|pakai|lewat|via|melalui)",
         r"\b(gopay|ovo|dana|qris|bca|mandiri|bni|bri|linkaja|shopeepay|transfer)\b"
     ],
     "ask_transparency": [
@@ -229,7 +229,85 @@ INTENT_PATTERNS = {
     "negative_sentiment": [
         r"\b(jelek|buruk|mengecewakan|kecewa|tidak suka|benci|marah|kesal|lelet|lambat|error|bug)\b"
     ],
+
+    # ✨ ═══════════════════════════════════════════════════════════════
+    # 💥 10 NEW HUMANIZED SCENARIO INTENTS (ADDED)
+    # ═══════════════════════════════════════════════════════════════════
+    "ask_refund_donation": [
+        r"(salah.*(nominal|transfer|kirim|donasi|input|ketik))",
+        r"(salah\s+(ngetik|ketik))",
+        r"(batal|refund|tarik|kembali)",
+        r"(bisa.*(batal|refund|kembali|tarik|salah))"
+    ],
+    "ask_tax_deduction": [
+        r"(potong.*pajak|pengurang.*pajak|insentif.*pajak)",
+        r"(bukti.*(pajak|spt|pajak))",
+        r"\bpajak\b"
+    ],
+    "ask_zakat_infak": [
+        r"\b(zakat|infaq|infak|sedekah|shodaqoh|fitrah|maal)\b",
+        r"bisa.*(zakat|infak|sedekah)"
+    ],
+    "ask_corporate_partnership": [
+        r"(kerjasama|mitra|partnership|kolaborasi|csr|perusahaan|instansi|komunitas)",
+        r"atas\s+nama\s+(pt|perusahaan|komunitas)"
+    ],
+    "ask_receipt_invoice": [
+        r"(kuitansi|kwitansi|nota|invoice|sertifikat|e-sertifikat|bukti.*donasi)"
+    ],
+    "ask_monthly_donation": [
+        r"(donasi.*(rutin|bulanan|tiap bulan|berlangganan))",
+        r"(rutinan|autodebet|setiap\s+bulan)"
+    ],
+    "ask_create_campaign": [
+        r"(buat|buka|galang|bikin).*(dana|kampanye|open\s+donasi|fundraising)",
+        r"cara\s+galang\s+dana\s+sendiri"
+    ],
+    "ask_inactive_campaign": [
+        r"(kalau|jika).*(tidak.*tercapai|kurang|sisa|target.*tidak)",
+        r"target.*dana.*kurang",
+        r"bagaimana.*dana.*tidak.*terpenuhi"
+    ],
+    "ask_goods_donation": [
+        r"(donasi|sumbang|bantu).*(barang|baju|pakaian|makanan|buku|sembako)",
+        r"bisa\s+pakai\s+barang"
+    ],
+    "ask_forgot_anonymous": [
+        r"(lupa.*(hamba\s+allah|sembunyi|anonim|nama.*muncul|hapus.*nama))",
+        r"ingin.*ubah.*anonim"
+    ],
+    "ask_legality": [
+        r"(legalitas|izin|resmi|terdaftar|penipuan|terpercaya|valid|kemensos)"
+    ],
+    "ask_minimum_donation": [
+        r"(minimal|paling\s+kecil|batas\s+bawah).*(donasi|sumbang|transfer)"
+    ],
+    "ask_cancel_monthly": [
+        r"(batal|berhenti|stop|cancel|hapus).*(rutin|autodebet|berlangganan|tiap\s+bulan)"
+    ],
+    "ask_payment_issue": [
+        r"(belum\s+masuk|pending|gagal|error|bermasalah).*(donasi|transfer|pembayaran|saldo)"
+    ],
+    "ask_change_profile": [
+        r"(ubah|ganti|edit|update).*(profil|nama|akun|password|email|nomor)"
+    ],
+    "ask_annual_report": [
+        r"(laporan|report|transparansi|bukti).*(tahunan|penyaluran|penggunaan\s+dana)"
+    ],
+    "ask_event_invitation": [
+        r"(undang|seminar|acara|narasumber|speaker|kunjungan).*(yayasan|donasicare)"
+    ],
+    "ask_data_privacy": [
+        r"(aman|privasi|bocor|data\s+pribadi|ktp|hack)"
+    ],
+    "ask_emergency_help": [
+        r"(darurat|mendesak|kritis|sekarat|butuh\s+bantuan\s+sekarang|tolong\s+segera)"
+    ],
+    "ask_collab_media": [
+        r"(media|jurnalis|liputan|wawancara|press\s+release|berita)"
+    ]
 }
+
 def classify_intent(text: str) -> str:
     """Klasifikasikan intent dari teks pengguna menggunakan regex pattern matching."""
     text_lower = text.lower().strip()
@@ -239,6 +317,17 @@ def classify_intent(text: str) -> str:
         for pattern in patterns:
             matches = re.findall(pattern, text_lower)
             score += len(matches)
+        
+        # Berikan bobot ekstra untuk intent spesifik agar tidak tertutup oleh angka donasi
+        if intent in ["ask_refund_donation", "ask_tax_deduction", "ask_zakat_infak", 
+                      "ask_corporate_partnership", "ask_receipt_invoice", "ask_monthly_donation", 
+                      "ask_create_campaign", "ask_inactive_campaign", "ask_goods_donation", 
+                      "ask_forgot_anonymous", "negative_sentiment",
+                      "ask_legality", "ask_minimum_donation", "ask_cancel_monthly", 
+                      "ask_payment_issue", "ask_change_profile", "ask_annual_report", 
+                      "ask_event_invitation", "ask_data_privacy", "ask_emergency_help", "ask_collab_media"]:
+            score *= 1000
+            
         if score > 0:
             scores[intent] = score
     
@@ -264,7 +353,6 @@ def detect_mood(text: str) -> str:
 # ── Context Management ───────────────────────────────────────────────
 def detect_context(history: list) -> str:
     if not history: return None
-    # Cari ke belakang hingga 5 pesan terakhir untuk mendeteksi program aktif
     for msg in reversed(history[-5:]):
         text = msg.get("content", "").lower() if isinstance(msg, dict) else str(msg).lower()
         if "banjir demak" in text: return "banjir_demak"
@@ -285,8 +373,8 @@ def _get_active_program_data(context: str, default_intent: str):
 
 # ── Response Templates (Humanist, Empathetic, Persuasive) ──────────────────
 GREETING_RESPONSES = [
-    "Halo, Kak! 👋 Senang sekali bisa mengobrol dengan Anda. Saya CareBot, siap membantu menjawab pertanyaan seputar program kebaikan di DonasiCare. Ada yang bisa saya bantu hari ini? 😊",
-    "Hai! Selamat datang di DonasiCare. 🌿 Saya di sini untuk menemani Anda mencari cara terbaik berbagi kebaikan. Ada program spesifik yang ingin Kakak tanyakan?",
+    "Halo, Kak! 👋 Senang sekali bisa mengobrol dengan Anda. Saya CareBot, siap membantu menjawab pertanyaan seputar program kebaikan di DonasiCare. Kira-kira, program donasi seperti apa yang sedang Kakak cari hari ini? Apakah Kakak tertarik pada program pendidikan, kesehatan, lingkungan, atau mungkin bantuan bencana alam? 😊",
+    "Hai, Kak! Selamat datang di DonasiCare. 🌿 Saya di sini untuk menemani Anda mencari cara terbaik berbagi kebaikan. Ada program spesifik yang ingin Kakak ketahui atau tanyakan hari ini?",
 ]
 
 FAREWELL_RESPONSES = [
@@ -412,6 +500,175 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
     fillers_info = ["Tentu saja! ", "Baiklah, ", "Siap! ", "Oh, tentu bisa. ", "Ini dia detailnya: ", "Mari saya jelaskan. "]
     fillers_search = ["Hmm, sebentar ya saya carikan... 🤔\n\n", "Beri saya waktu sejenak untuk mengecek... 🔍\n\n", "Wah, niat yang sangat mulia! Ini beberapa daftarnya:\n\n"]
     
+    # ✨ ═══════════════════════════════════════════════════════════════
+    # 💥 PRIORITY 10 NEW SCENARIO HANDLERS
+    # ═══════════════════════════════════════════════════════════════════
+    if intent == "ask_refund_donation":
+        return (
+            "Aduh, jangan panik dulu ya, Kak! Tenang saja, kami paham hal seperti ini bisa terjadi. 😌\n\n"
+            "Kalau Kakak tidak sengaja salah memasukkan nominal donasi atau salah transfer, dana tersebut bisa diproses untuk pengembalian (refund) atau dialihkan ke program lain sesuai kemauan Kakak.\n\n"
+            "Hubungi tim CS human kami segera lewat tombol Hubungi Kami atau WhatsApp Official dengan melampirkan:\n\n"
+            "Bukti transfer\n\n"
+            "Username / Email terdaftar\n\n"
+            "Nominal yang seharusnya\n\n"
+            "Proses ini biasanya memakan waktu 1-3 hari kerja tergantung metode pembayaran. Kami siap bantu sampai tuntas! 🫶"
+        )
+    elif intent == "ask_tax_deduction":
+        return (
+            "Wah, pertanyaan bagus sekali! Niat baik Kakak bisa mendatangkan manfaat ganda. 📄✨\n\n"
+            "DonasiCare merupakan lembaga penggalangan dana resmi yang telah diakui pemerintah. Oleh karena itu, setiap donasi tertentu di platform kami bisa digunakan sebagai pengurang penghitungan pajak penghasilan (SPT Tahunan) Kakak.\n\n"
+            "Caranya gampang:\n"
+            "1️⃣ Pastikan Kakak mengisi nomor NPWP di profil akun DonasiCare.\n"
+            "2️⃣ Ajukan permohonan Bukti Potong Pajak di menu riwayat donasi.\n"
+            "3️⃣ Tim kami akan mengirimkan dokumen resmi via email untuk dilampirkan saat lapor SPT.\n\n"
+            "Berbagi kebaikan jadi makin tenang dan berkah, kan? 😊"
+        )
+    elif intent == "ask_zakat_infak":
+        return (
+            "Bisa banget, Kak! Alhamdulillah, DonasiCare tidak hanya menyalurkan donasi umum, tetapi juga mengelola Zakat (Zakat Maal & Zakat Fitrah), Infak, serta Sedekah secara syariah. 🌙\n\n"
+            "Kami bekerja sama dengan lembaga amil zakat resmi terverifikasi untuk memastikan penyaluran dana zakat Kakak jatuh tepat kepada 8 golongan asnaf yang berhak menerima.\n\n"
+            "Kakak bisa langsung mengunjungi tab Zakat & Infak Center di aplikasi untuk menghitung kewajiban menggunakan Kalkulator Zakat otomatis kami. Praktis dan berkah insyaAllah! 🤲"
+        )
+    elif intent == "ask_corporate_partnership":
+        return (
+            "Wah, pintu kolaborasi terbuka lebar banget untuk Kakak! 🤝🏢\n\n"
+            "Kami sangat menyambut baik instansi, komunitas, maupun perusahaan yang ingin menyalurkan dana CSR (Corporate Social Responsibility) atau mengadakan program kebaikan bersama secara kolektif.\n\n"
+            "DonasiCare menyediakan:\n\n"
+            "Laporan audit khusus dan akuntabel.\n\n"
+            "Branding logo partner di halaman kampanye.\n\n"
+            "Dokumentasi penyaluran eksklusif untuk korporat.\n\n"
+            "Biar ngobrolnya lebih enak dan intens, Kakak bisa langsung kirim proposal atau kontak tim kemitraan kami melalui email di partnership@donasicare.org. Mari kita buat dampak yang lebih luas bersama! 🚀"
+        )
+    elif intent == "ask_receipt_invoice":
+        return (
+            "Tentu saja bisa, Kak! Bukti transparansi adalah komitmen kami. 🧾🎖️\n\n"
+            "Setiap kali donasi Kakak berhasil diverifikasi oleh sistem, DonasiCare akan otomatis menerbitkan e-Sertifikat Penghargaan serta Kuitansi Resmi Digital sebagai bukti sah berkontribusi.\n\n"
+            "Cara unduhnya gampang banget:\n"
+            "1️⃣ Masuk ke akun DonasiCare Kakak.\n"
+            "2️⃣ Buka halaman Riwayat Donasi.\n"
+            "3️⃣ Klik transaksi yang diinginkan, lalu pilih tombol Unduh Sertifikat/Kuitansi.\n\n"
+            "Dokumen tersebut juga otomatis dikirimkan ke email Kakak, kok. Bisa disimpan rapi buat kenang-kenangan digital! 😉"
+        )
+    elif intent == "ask_monthly_donation":
+        return (
+            "MasyaAllah, mulia banget niatnya Kak! Konsisten dalam berbagi itu hal yang luar biasa indah. 🗓️❤️\n\n"
+            "Di DonasiCare ada fitur Donasi Rutin (Autodebet). Kakak bisa menyisihkan kebaikan secara otomatis setiap minggu atau setiap bulan tanpa perlu takut lupa transfer lagi.\n\n"
+            "Cara mengaktifkannya:\n\n"
+            "Pilih salah satu program jangka panjang (seperti Beasiswa Anak atau Pengobatan Pasien).\n\n"
+            "Klik tombol 'Donasi Rutin'.\n\n"
+            "Atur tanggal pemotongan dan pilih metode pembayaran pendukung (seperti LinkAja, GoPay, atau Kartu Debit).\n\n"
+            "Kakak bisa membatalkan atau mengubah nominalnya kapan saja secara fleksibel di menu pengaturan akun. 😊"
+        )
+    elif intent == "ask_create_campaign":
+        return (
+            "Halo Kak! Terima kasih banyak sudah peduli dengan lingkungan sekitar. 💡\n\n"
+            "Untuk saat ini, demi menjaga keamanan dan mencegah penipuan, pembuatan program kampanye galang dana mandiri langsung oleh perorangan umum masih dibatasi melalui proses kurasi yang cukup ketat.\n\n"
+            "Namun, jika Kakak mewakili Yayasan Resmi, LSM, atau Komunitas Sosial berbadan hukum, Kakak bisa mendaftar sebagai Mitra Penggalang Dana dengan mengunggah dokumen legalitas di halaman Mitra Center.\n\n"
+            "Jika ada kasus darurat perorangan di sekitar Kakak yang mendesak, Kakak bisa mengirimkan kronologi lengkap ke tim peninjau kami via email agar kami bantu salurkan ke mitra lapangan terdekat. 🤝"
+        )
+    elif intent == "ask_inactive_campaign":
+        return (
+            "Ini pertanyaan yang kritis dan cerdas sekali, Kak! Tenang, dana kebaikan tidak akan hangus atau sia-sia. 🎯\n\n"
+            "Apabila batas waktu pencarian dana berakhir namun target nominal kampanye belum terpenuhi, aturan DonasiCare adalah:\n\n"
+            "Tetap Disalurkan: Dana yang sudah terkumpul berapapun jumlahnya akan tetap disalurkan kepada penerima manfaat sesuai dengan skala prioritas kebutuhan mendesak mereka. 🛒\n\n"
+            "Pengalihan Kasus Serupa: Jika program tersebut benar-benar tidak bisa dijalankan karena dananya terlalu minim, maka dana akan dialihkan ke program lain yang sejenis (atas persetujuan perwakilan lapangan) dengan transparansi penuh.\n\n"
+            "Jadi, setiap rupiah yang Kakak titipkan di sini dipastikan 100% bergerak membawa manfaat! 🌿"
+        )
+    elif intent == "ask_goods_donation":
+        return (
+            "Wah, senangnya! Bantuan tidak melulu soal uang kok, Kak. Pakaian layak, buku, atau sembako juga sangat berharga! 📦\n\n"
+            "Kabar baiknya, DonasiCare menerima Donasi Berupa Barang fisik untuk program penanganan bencana alam dan pendidikan.\n\n"
+            "Cara menyumbang barang:\n"
+            "📦 Kirim/antarkan langsung barang Kakak ke Drop Box Center DonasiCare terdekat di kota Kakak (Daftar alamat lengkap ada di halaman hubungi kami).\n"
+            "🚚 Kakak juga bisa menggunakan ekspedisi logistik dengan menuliskan kode program di luar paket.\n\n"
+            "Mohon pastikan barang yang disumbangkan (terutama pakaian dan buku) dalam kondisi bersih dan masih layak pakai ya, Kak. Terima kasih banyak! 😊"
+        )
+    elif intent == "ask_forgot_anonymous":
+        return (
+            "Oalah! Tenang, Kak, privasi Kakak sepenuhnya aman bersama kami. Jangan khawatir ya. 🔒\n\n"
+            "Kalau Kakak kemarin lupa mencentang opsi 'Donasikan sebagai Hamba Allah' sehingga nama asli Kakak telanjur muncul di tab donatur publik, hal itu bisa langsung diubah kok!\n\n"
+            "Caranya:\n"
+            "1️⃣ Masuk ke akun Kakak, pilih menu Riwayat Donasi.\n"
+            "2️⃣ Cari transaksi yang ingin diubah privasinya.\n"
+            "3️⃣ Klik tanda titik tiga di pojok kanan atas transaksi, lalu aktifkan centang 'Sembunyikan Nama Saya (Anonim)'.\n\n"
+            "Sistem akan langsung memperbarui daftar publik dalam hitungan detik menjadi Hamba Allah. Aman terkendali! 👌"
+        )
+    elif intent == "ask_legality":
+        return (
+            "Tentu, Kak! Kepercayaan Kakak adalah amanah terbesar kami. 🛡️\n\n"
+            "DonasiCare sudah terdaftar resmi dan memiliki izin operasional dari Kementerian Sosial Republik Indonesia sebagai Lembaga Kesejahteraan Sosial (LKS). Kami juga rutin diaudit oleh akuntan publik independen setiap tahunnya dengan predikat Wajar Tanpa Pengecualian (WTP).\n\n"
+            "Jadi, Kakak bisa berdonasi dengan tenang dan aman. Ada program yang ingin Kakak dukung hari ini? 😊"
+        )
+    elif intent == "ask_minimum_donation":
+        return (
+            "Wah, niat baik sekecil apapun sangat kami hargai, Kak! ❤️\n\n"
+            "Di DonasiCare, Kakak bisa mulai berdonasi hanya dengan Rp10.000 saja jika menggunakan metode pembayaran e-Wallet seperti GoPay, OVO, atau Dana. Sedangkan untuk Virtual Account Bank, minimal donasinya adalah Rp50.000 mengikuti kebijakan perbankan.\n\n"
+            "Percayalah, satu rupiah dari Kakak bisa jadi senyuman untuk mereka yang membutuhkan. Yuk, mulai kebaikanmu hari ini! ✨"
+        )
+    elif intent == "ask_cancel_monthly":
+        return (
+            "Halo Kak! Terima kasih banyak ya sudah pernah menjadi pahlawan kebaikan secara rutin bersama kami. 🥺❤️\n\n"
+            "Kalau Kakak sedang ada keperluan lain dan ingin menghentikan donasi rutin (autodebet), tentu saja bisa kapan pun tanpa syarat yang ribet.\n\n"
+            "Caranya:\n"
+            "1️⃣ Masuk ke akun DonasiCare.\n"
+            "2️⃣ Buka menu **Donasi Rutin Saya**.\n"
+            "3️⃣ Pilih program yang aktif, lalu klik **Berhenti Autodebet**.\n\n"
+            "Sistem kami akan langsung menyetop pemotongan di bulan berikutnya. Kami tunggu Kakak kembali menyebar kebaikan di lain waktu ya! 🫶"
+        )
+    elif intent == "ask_payment_issue":
+        return (
+            "Aduh, mohon maaf banget ya Kak kalau ada kendala di sistem pembayaran kami! Jangan khawatir, dana Kakak pasti aman kok. 🛠️\n\n"
+            "Biasanya, jika status donasi masih 'Pending', sistem bank atau e-wallet sedang membutuhkan waktu sedikit lebih lama (maksimal 1x24 jam) untuk proses sinkronisasi.\n\n"
+            "Biar kami bantu cek lebih cepat, Kakak bisa langsung klik tombol **Hubungi Kami** dan infokan Nomor Invoice atau screenshot bukti transfernya. Tim CS kami akan langsung mengurusnya sampai statusnya sukses! 🚀"
+        )
+    elif intent == "ask_change_profile":
+        return (
+            "Siap, Kak! Untuk urusan ganti foto profil, nama, atau alamat email, gampang banget kok! 📝\n\n"
+            "Kakak tinggal masuk ke aplikasi/web DonasiCare, lalu:\n"
+            "1️⃣ Pergi ke menu **Profil** di pojok kanan atas.\n"
+            "2️⃣ Klik icon pensil atau tombol **Edit Profil**.\n"
+            "3️⃣ Ubah data yang Kakak inginkan dan klik **Simpan**.\n\n"
+            "Voila! Profil Kakak otomatis ter-update. Kalau mau ganti nomor HP yang terhubung ke e-Wallet, pastikan nomor barunya aktif ya! 😉"
+        )
+    elif intent == "ask_annual_report":
+        return (
+            "Wah, saya senang sekali Kakak peduli dengan transparansi! 📊✨\n\n"
+            "Bagi kami, laporan penyaluran dana itu wajib hukumnya. Kakak bisa mengunduh **Laporan Keuangan & Penyaluran Tahunan** DonasiCare secara bebas.\n\n"
+            "Caranya:\n"
+            "Silakan kunjungi halaman utama kami, scroll ke bagian paling bawah (footer), dan klik menu **Laporan Transparansi**. Di sana Kakak bisa unduh dokumen PDF lengkap beserta dokumentasi lapangannya.\n\n"
+            "Setiap rupiah yang dititipkan, pasti kami pertanggungjawabkan! 🤝"
+        )
+    elif intent == "ask_event_invitation":
+        return (
+            "Halo Kak! Wah, suatu kehormatan luar biasa bagi kami bisa diundang ke acara Kakak. 🎉\n\n"
+            "Tim DonasiCare dengan senang hati terbuka untuk hadir sebagai narasumber, kolaborator, atau sekadar *sharing session* seputar gerakan sosial dan kerelawanan.\n\n"
+            "Agar tim kami bisa menyesuaikan jadwal, Kakak bisa mengirimkan *Term of Reference* (ToR) atau undangan resminya ke email kami di **event@donasicare.org**. Nanti tim representatif kami akan membalas secepatnya ya! 🗓️"
+        )
+    elif intent == "ask_data_privacy":
+        return (
+            "Pertanyaan yang sangat *mindful*, Kak! Di era digital ini privasi memang nomor satu. 🔒\n\n"
+            "DonasiCare menerapkan standar keamanan enkripsi *End-to-End* dan kepatuhan penuh terhadap UU Pelindungan Data Pribadi (PDP). Artinya:\n"
+            "✅ Data pribadi Kakak tidak akan pernah dijual ke pihak ketiga.\n"
+            "✅ Nomor HP dan Email murni hanya digunakan untuk laporan donasi.\n"
+            "✅ Sistem pembayaran kami terintegrasi langsung dengan gerbang pembayaran (Payment Gateway) berlisensi Bank Indonesia.\n\n"
+            "Jadi, identitas Kakak tersimpan sangat rapat dan aman di brankas digital kami! 🛡️"
+        )
+    elif intent == "ask_emergency_help":
+        return (
+            "Ya ampun, Kak! Saya ikut prihatin mendengarnya. 🥺\n\n"
+            "Jika ini adalah situasi **darurat medis atau bencana alam** yang membutuhkan penanganan sangat segera, Kakak harus langsung menghubungi layanan darurat pemerintah seperti 119 (Ambulans) atau 112 (Panggilan Darurat).\n\n"
+            "Namun, untuk permohonan bantuan dana *pasca-darurat*, Kakak atau perwakilan keluarga bisa mengirimkan pesan darurat ke WhatsApp Hotline khusus kami di **0811-9999-SOS** dengan menyertakan foto kondisi dan lokasi. Tim lapangan kami akan melakukan peninjauan cepat (Fast Response) dalam 24 jam! 🚑"
+        )
+    elif intent == "ask_collab_media":
+        return (
+            "Halo rekan media! Wah, senang sekali rasanya mendapat sapaan dari teman-teman pers. 📰✨\n\n"
+            "Kami selalu terbuka untuk wawancara, liputan eksklusif, maupun kebutuhan *press release* seputar kegiatan sosial kemanusiaan DonasiCare.\n\n"
+            "Silakan langsung hubungi tim Public Relations kami melalui:\n"
+            "📧 Email: **pr@donasicare.org**\n"
+            "📱 WhatsApp Humas: **0812-Media-Care**\n\n"
+            "Mari bersama-sama kita sebarluaskan virus kebaikan ke seluruh penjuru negeri! 🇮🇩🎤"
+        )
+
     # 1. Program Introduction Intents (Statis - Program 1)
     if intent == "ask_disaster_detail":
         p = DETAILED_PROGRAMS["banjir_demak"]
@@ -536,10 +793,12 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
         return (
             "Jangan khawatir, Kak! 🛡️ Keamanan dan kepercayaan donatur adalah prioritas utama kami.\n\n"
             "Platform DonasiCare menggunakan sistem enkripsi data tingkat tinggi dan bekerja sama dengan payment gateway resmi (Gopay, OVO, Bank). "
-            "Setiap penggalang dana dan program juga telah melewati proses verifikasi identitas yang ketat untuk mencegah penipuan. 🔒\n\n"
+            "Setiap penggalang dana and program juga telah melewati proses verifikasi identitas yang ketat untuk mencegah penipuan. 🔒\n\n"
             "Donasi Kakak dijamin 100% aman. Ada program yang ingin Kakak dukung hari ini? 😊"
         )
-        
+
+
+
     elif intent == "ask_impact_simulation":
         matches = re.findall(r"(?:rp|Rp)?\s*(\d{1,3}(?:\.\d{3})*|\d+)", text.lower())
         nom = 0
@@ -628,7 +887,8 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
         "• 📋 Rekomendasi program donasi\n"
         "• 📝 Cara dan panduan berdonasi\n"
         "• 💳 Pilihan metode pembayaran\n"
-        "• 📊 Transparansi penyaluran dana\n\n"
+        "• 📊 Transparansi penyaluran dana\n"
+        "• 📦 Donasi berupa barang / baju / sembako\n\n"
         "Silakan ketik ulang atau pilih topik di atas ya!",
         
         f"Aduh, sepertinya pertanyaan itu di luar pengetahuan saya saat ini. 😅\n\n"
