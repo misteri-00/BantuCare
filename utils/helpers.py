@@ -16,7 +16,7 @@ KATEGORI_IMAGE = {
     "Pendidikan": os.path.join(ASSETS, "banner_education.jpg"),
     "Kesehatan": os.path.join(ASSETS, "banner_health.webp"),
     "Bencana Alam": os.path.join(ASSETS, "banner_food.jpg"),
-    "Lingkungan": os.path.join(ASSETS, "banner_education.jpg"),
+    "Lingkungan": os.path.join(ASSETS, "images(1).webp"),
     "Panti Asuhan": os.path.join(ASSETS, "banner_food.jpg"),
 }
 
