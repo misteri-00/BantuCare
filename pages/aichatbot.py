@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import time
 import sys
 import os
@@ -637,10 +638,11 @@ def tab_generator():
 # MAIN
 # ══════════════════════════════════════════════════════════════════════
 def main():
+    render_navbar("aichatbot")
     inject_css()
 
     st.markdown("""
-<div class="pg-header">
+<br><div class="pg-header">
 <span class="eyebrow">DonasiCare · Powered by AI</span>
 <h1>Asisten <em>Cerdas</em> Donasi</h1>
 <p>Pendamping pintar untuk perjalanan donasi yang lebih bermakna</p>

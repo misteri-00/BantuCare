@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import time
 import datetime
 import random
@@ -727,6 +728,7 @@ div[data-testid="column"]:has(.dn-nom-pill) .stButton button {
 # MAIN
 # ══════════════════════════════════════════════════════════════════════
 def main():
+    render_navbar("donasi")
     inject_css()
     init_session()
 

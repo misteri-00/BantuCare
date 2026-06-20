@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import pandas as pd
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -144,6 +145,7 @@ CAT_EMOJI = {
 
 
 def main():
+    render_navbar("petabantuan")
     inject_css()
 
     # ── Header ──

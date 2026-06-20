@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 
 # ═══════════════════════════════════════════════════════════════════════
 # DonasiCare – TENTANG KAMI PAGE
@@ -169,6 +170,7 @@ def inject_custom_css():
 
 
 def main():
+    render_navbar("tentangkami")
     inject_custom_css()
 
     st.markdown("""

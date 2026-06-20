@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import time
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
@@ -215,6 +216,7 @@ def register_event_dialog(event_name):
 
 
 def main():
+    render_navbar("volunteer")
     inject_custom_css()
 
     vol_count = get_volunteer_count()

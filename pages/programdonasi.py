@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -190,6 +191,7 @@ def inject_custom_css():
 
 
 def main():
+    render_navbar("programdonasi")
     inject_custom_css()
     
     # ── Header ─────────────────────────────────────────────────────────

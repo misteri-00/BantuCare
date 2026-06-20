@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.navbar_dark import render_navbar
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -155,6 +156,7 @@ header[data-testid="stHeader"] { background: transparent !important; }
 
 
 def main():
+    render_navbar("riwayat")
     inject_css()
 
     # ── Header ──

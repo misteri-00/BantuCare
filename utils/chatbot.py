@@ -864,38 +864,109 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
     if intent in ["ask_date_time", "ask_location", "ask_victim_count", "ask_needs", "ask_impact_100k", "ask_impact_500k"]:
         return "Program mana yang Kakak maksud? (Contoh: Banjir Demak, Pendidikan, Kesehatan, atau Lingkungan)"
 
-    # 6. Fallback Judul / Keyword matching dari Database Kampanye (Program 2)
+    # 6. Smart Knowledge Base Retrieval (RAG Simulation)
     campaigns = get_all_campaigns()
     prompt_lower = text.lower()
-    matched = [c for c in campaigns if any(word in c['judul'].lower() for word in prompt_lower.split() if len(word) > 3)]
     
-    if matched:
-        response = random.choice(["Sepertinya saya menemukan sesuatu yang pas dengan pencarian Anda:\n\n", "Coba lihat beberapa program ini, mungkin sesuai dengan maksud Anda:\n\n"])
-        for c in matched[:2]:
-            progress = min(int((c['dana_terkumpul'] / c['target_dana']) * 100), 100) if c['target_dana'] > 0 else 0
-            response += f"📌 **{c['judul']}** ({c['kategori']})\n"
-            response += f"   Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n"
-        response += "Untuk informasi lebih lengkap, Anda bisa cek di halaman **Program Donasi** ya."
-        return response
+    HUMANIZED_STORIES = {
+        1: (
+            "👩‍🏫 **Kondisi di Lapangan:**\n"
+            "Saat ini ada ratusan anak cerdas di pelosok yang terancam putus sekolah. "
+            "Tim kami (Kak Nisa & Kak Budi) mendampingi mereka setiap minggu, memastikan seragam, SPP, dan alat tulis terpenuhi. "
+            "Bantuan Kakak adalah tiket masa depan mereka untuk terus bermimpi."
+        ),
+        2: (
+            "🆘 **Update Evakuasi Bencana:**\n"
+            "Sekitar 400 keluarga masih bertahan di posko pengungsian dengan kondisi kedinginan. "
+            "Tim relawan yang dikomandoi Pak Ridwan sedang bekerja siang-malam memasak di dapur umum dan menyalurkan pakaian kering serta obat-obatan. "
+            "Mereka sangat membutuhkan uluran tangan kita secepatnya!"
+        ),
+        3: (
+            "🌳 **Gerakan Penyelamatan Lahan:**\n"
+            "Kondisi hulu sungai semakin rawan longsor. Bersama Mang Udin (tokoh masyarakat) dan 50 relawan lokal, "
+            "kami sedang menanam pohon produktif yang kelak selain menahan longsor, buahnya bisa dijual untuk menghidupi ekonomi desa. "
+            "Ini adalah tabungan amal jariyah yang terus mengalir."
+        ),
+        4: (
+            "🏡 **Kisah Panti Asuhan:**\n"
+            "Panti Asuhan ini menjadi rumah bagi 45 anak yatim piatu. Mereka diasuh dengan penuh kasih sayang oleh Bunda Rina dibantu 3 pengasuh sukarela yang menemani mereka belajar dan bermain. "
+            "Saat ini, mereka sedang kesulitan memenuhi kebutuhan sembako bulanan dan atap asrama yang bocor. Bantuan Kakak akan membuat mereka merasa tidak sendirian di dunia ini. ❤️"
+        )
+    }
+    
+    knowledge_base = []
+    
+    # 6.1. Semua Kampanye
+    for c in campaigns:
+        progress = min(int((c['dana_terkumpul'] / c['target_dana']) * 100), 100) if c['target_dana'] > 0 else 0
+        story = HUMANIZED_STORIES.get(c['id'], c['deskripsi'])
+        
+        knowledge_base.append({
+            "keywords": f"{c['judul'].lower()} {c['deskripsi'].lower()} {c['kategori'].lower()} kampanye donasi program {c.get('lokasi', '').lower()} {story.lower()}",
+            "response": f"📌 **{c['judul']}** ({c['kategori']})\n\n{story}\n\n📍 Lokasi: {c.get('lokasi', 'Indonesia')}\n💰 Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n💡 _Jika hati Kakak tergerak, klik 'Donasi Sekarang' di menu sebelah kiri ya!_"
+        })
+        
+    # 6.2. Statistik Website
+    total_dana = get_total_donasi()
+    total_donatur = get_donation_count()
+    total_kampanye = get_campaign_count()
+    knowledge_base.append({
+        "keywords": "statistik data website jumlah donatur orang pengguna total dana uang terkumpul rupiah program kampanye berjalan",
+        "response": f"📊 **Statistik DonasiCare Saat Ini:**\n\n💰 Total Dana Terkumpul: **{format_rupiah(total_dana)}**\n👥 Donatur Aktif: **{total_donatur:,} Orang**\n🎯 Program Berjalan: **{total_kampanye} Kampanye**\n\nTerima kasih kepada seluruh orang baik yang telah berkontribusi!"
+    })
+    
+    # 6.3. Relawan / Volunteer
+    knowledge_base.append({
+        "keywords": "relawan volunteer gabung daftar bantu tenaga sukarelawan tugas pekerjaan lapangan",
+        "response": "🙌 **Pusat Relawan (Volunteer Center)**\n\nKami memiliki berbagai misi kerelawanan, seperti:\n1. **Relawan Distribusi Pangan** (Membagikan sembako ke panti asuhan)\n2. **Guru Relawan Pelosok** (Mengajar anak-anak di daerah terpencil)\n3. **Relawan Medis Darurat** (Tenaga kesehatan untuk bencana)\n\nAnda bisa mendaftar dengan menuju ke menu **Volunteer Center** di bilah navigasi!"
+    })
+    
+    # 6.4. Tentang Kami & Impact Tracker
+    knowledge_base.append({
+        "keywords": "tentang kami visi misi profil donasicare yayasan organisasi siapa alamat",
+        "response": "🏢 **Tentang DonasiCare**\n\nDonasiCare adalah platform urun dana (crowdfunding) yang transparan dan terpercaya. Visi kami adalah menghubungkan kebaikan ke seluruh penjuru negeri.\nKami memastikan 100% dana tersalurkan tepat sasaran tanpa potongan tersembunyi. Anda bisa mengecek transparansi di menu **Tentang Kami**."
+    })
+    knowledge_base.append({
+        "keywords": "impact tracker peta bantuan jejak dampak penyaluran laporan lokasi bukti",
+        "response": "🗺️ **Impact Tracker & Peta Bantuan**\n\nKami memiliki fitur pelacak dampak langsung di website kami. Anda dapat melihat Peta Bantuan Interaktif yang menunjukkan di mana saja donasi telah disalurkan beserta foto laporannya. Silakan buka menu **Peta Bantuan** atau **Impact Tracker**!"
+    })
+    
+    # Simple Scoring
+    words = [w for w in prompt_lower.split() if len(w) > 3]
+    if "semua" in prompt_lower or "semuanya" in prompt_lower or "semua data" in prompt_lower:
+        words.extend(["kampanye", "statistik", "relawan", "tentang", "impact"])
 
-    # 7. Final Fallback (Program 2)
+    best_matches = []
+    
+    for kb in knowledge_base:
+        score = sum(2 if w in kb["keywords"].split() else (1 if w in kb["keywords"] else 0) for w in words)
+        if score > 0:
+            best_matches.append((score, kb["response"]))
+            
+    if best_matches:
+        best_matches.sort(key=lambda x: x[0], reverse=True)
+        top_score = best_matches[0][0]
+        # Jika keywordnya global spt "semua", tampilkan top 4
+        limit = 4 if "semua" in prompt_lower else 2
+        answers = [ans for sc, ans in best_matches if top_score - sc <= 2][:limit]
+        
+        reply = "🔍 Berdasarkan seluruh data di DonasiCare, ini yang bisa saya sampaikan:\n\n"
+        reply += "\n\n---\n\n".join(answers)
+        return reply
+
+    # 7. Final Fallback (Jika benar-benar tidak ada keywords)
     time_greeting = _get_time_greeting()
     fallback_responses = [
-        f"Hmm... {time_greeting.lower()}, maaf ya, saya agak kesulitan menangkap maksud Anda. 🤔\n\n"
-        "Tapi jangan khawatir! Berikut beberapa hal yang bisa saya bantu jawab:\n"
-        "• 💰 Info total donasi terkumpul\n"
-        "• 📋 Rekomendasi program donasi\n"
-        "• 📝 Cara dan panduan berdonasi\n"
-        "• 💳 Pilihan metode pembayaran\n"
-        "• 📊 Transparansi penyaluran dana\n"
-        "• 📦 Donasi berupa barang / baju / sembako\n\n"
-        "Silakan ketik ulang atau pilih topik di atas ya!",
-        
-        f"Aduh, sepertinya pertanyaan itu di luar pengetahuan saya saat ini. 😅\n\n"
-        "Sebagai asisten DonasiCare, saya sangat mahir menjawab tentang program, cara donasi, "
-        "dan laporan transparansi. Ada yang bisa saya bantu dari topik-topik tersebut?",
+        f"Hmm... {time_greeting.lower()}, maaf ya, saya kurang paham maksud Anda. 🤔\n\n"
+        "Tapi tenang saja! Sekarang saya memiliki akses ke **SELURUH DATA** di website ini. Anda bebas bertanya tentang:\n"
+        "• Data statistik total donasi & donatur\n"
+        "• Info lengkap seluruh program kampanye\n"
+        "• Cara donasi atau pembayaran\n"
+        "• Cara menjadi relawan (volunteer)\n"
+        "• Profil dan transparansi DonasiCare (Impact Tracker)\n\n"
+        "Coba tanyakan satu per satu dengan kata kunci di atas!",
     ]
-    return random.choice(fallback_responses)
+    return fallback_responses[0]
 
 # ── Streaming / Typing Effect Generator ───────────────────────────────
 def stream_text(text: str, delay_min: float = 0.01, delay_max: float = 0.04, by_char: bool = False):
