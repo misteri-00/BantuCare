@@ -214,6 +214,15 @@ INTENT_PATTERNS = {
         r"(jadi|mau|ingin|pengen|gabung|daftar|bergabung).*(relawan|volunteer|sukarelawan)",
         r"cara.*(jadi|gabung).*relawan"
     ],
+    "choose_volunteer": [
+        r"(pilih|mau|daftar|ikut).*(distribusi|guru|medis|pangan|pelosok|darurat)",
+        r"\b(distribusi|guru\s+relawan|medis|pendidikan|bencana)\b"
+    ],
+    "fill_volunteer_info": [
+        r"[a-zA-Z\s]+\s*-\s*\d{1,2}\s*-\s*(08\d+|\+62\d+)\s*-\s*[a-zA-Z\s]+",
+        r"(nama|umur|usia|no\s+hp|nomor).*(nama|umur|usia|no\s+hp|nomor)",
+        r"(nama\s*:|umur\s*:|hp\s*:|wa\s*:)"
+    ],
     "ask_about": [
         r"(apa itu|tentang|mengenai|jelaskan|profil).*(donasicare|platform|organisasi|yayasan|apps|aplikasi)",
         r"(siapa|apa).*(donasicare|kalian|kamu|anda|carebot)"
@@ -231,8 +240,29 @@ INTENT_PATTERNS = {
     ],
 
     # ✨ ═══════════════════════════════════════════════════════════════
-    # 💥 10 NEW HUMANIZED SCENARIO INTENTS (ADDED)
+    # 💥 EXTENDED SCENARIO INTENTS (ADDED)
     # ═══════════════════════════════════════════════════════════════════
+    "ask_general_donation_guide": [
+        r"(panduan|informasi|penjelasan|detail).*(donasi|menyumbang|beramal)",
+        r"(pengen|ingin).*(tahu|paham).*(semua|banyak|lengkap).*(donasi)",
+        r"ceritakan.*(tentang donasi|proses donasi)"
+    ],
+    "ask_donation_behalf": [
+        r"(donasi|sumbang|sedekah).*(atas\s+nama|untuk|buat|wakilkan).*(orang\s+lain|almarhum|orang\s+tua|keluarga)",
+        r"bisa.*(atas\s+nama).*(almarhum)"
+    ],
+    "ask_donation_asset": [
+        r"(donasi|sumbang|wakaf).*(aset|tanah|bangunan|emas|saham|kendaraan)",
+        r"bisa.*(donasi|wakaf).*(tanah|rumah)"
+    ],
+    "ask_verification_process": [
+        r"(verifikasi|cek|validasi).*(mitra|lapangan|kampanye|program|penerima)",
+        r"mencegah.*(penipuan|fiktif)"
+    ],
+    "ask_riba_free": [
+        r"(bebas|tanpa).*(riba|bunga|potongan\s+bank)",
+        r"apakah.*(halal|syariah).*(donasi|sistem|platform)"
+    ],
     "ask_refund_donation": [
         r"(salah.*(nominal|transfer|kirim|donasi|input|ketik))",
         r"(salah\s+(ngetik|ketik))",
@@ -325,7 +355,9 @@ def classify_intent(text: str) -> str:
                       "ask_forgot_anonymous", "negative_sentiment",
                       "ask_legality", "ask_minimum_donation", "ask_cancel_monthly", 
                       "ask_payment_issue", "ask_change_profile", "ask_annual_report", 
-                      "ask_event_invitation", "ask_data_privacy", "ask_emergency_help", "ask_collab_media"]:
+                      "ask_event_invitation", "ask_data_privacy", "ask_emergency_help", "ask_collab_media",
+                      "choose_volunteer", "fill_volunteer_info", "ask_general_donation_guide",
+                      "ask_donation_behalf", "ask_donation_asset", "ask_verification_process", "ask_riba_free"]:
             score *= 1000
             
         if score > 0:
@@ -384,10 +416,11 @@ FAREWELL_RESPONSES = [
 
 VOLUNTEER_RESPONSES = [
     "Ingin jadi relawan? Luar biasa! 🦺\n\n"
-    "Anda bisa mendaftar melalui halaman **Volunteer Center** di menu navigasi. "
-    "Di sana Anda akan menemukan berbagai peluang kerelawanan, mulai dari distribusi bantuan "
-    "langsung di lapangan hingga kegiatan edukasi untuk anak-anak.\n\n"
-    "Mari bergabung dengan ribuan relawan DonasiCare lainnya!",
+    "Saat ini kami memiliki beberapa divisi relawan yang bisa Kakak pilih:\n"
+    "1. **Relawan Distribusi Pangan** (Membantu penyaluran logistik ke daerah bencana)\n"
+    "2. **Guru Relawan Pelosok** (Mengajar anak-anak di daerah terpencil)\n"
+    "3. **Relawan Medis Darurat** (Tenaga kesehatan pendamping korban bencana)\n\n"
+    "Kakak mau pilih menjadi relawan di divisi apa? Balas dengan divisi yang diinginkan ya! 😊",
 ]
 
 ABOUT_RESPONSES = [
@@ -488,6 +521,43 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
     if history is None:
         history = chat_history if chat_history is not None else []
         
+    # ── State Machine: Create Campaign Flow ──────────────────────────────
+    last_bot_msg = ""
+    for msg in reversed(history):
+        if isinstance(msg, dict) and msg.get("role") == "assistant":
+            last_bot_msg = msg.get("content", "")
+            break
+            
+    stop_words = ["batal", "cancel", "sudah", "tidak jadi", "stop"]
+    is_cancel = any(w in text.lower() for w in stop_words)
+    
+    if "Langkah 1: **Pilih Kategori**" in last_bot_msg:
+        if is_cancel: return "Baik Kak, pengisian formulir dibatalkan. Ada hal lain yang bisa dibantu? 😊"
+        return (
+            f"Baik, kategori '{text.strip()}' telah dicatat.\n\n"
+            "Langkah 2: **Judul Kampanye**.\nApa judul kampanye yang ingin Kakak buat? (Misal: 'Bantu Pembangunan Sekolah X' atau 'Bantu Pak Budi Sembuh')"
+        )
+    elif "Langkah 2: **Judul Kampanye**" in last_bot_msg:
+        if is_cancel: return "Baik Kak, pengisian formulir dibatalkan. Ada hal lain yang bisa dibantu? 😊"
+        return (
+            "Judul yang bagus!\n\n"
+            "Langkah 3: **Target Donasi**.\nBerapa perkiraan nominal dana yang dibutuhkan untuk kampanye ini?"
+        )
+    elif "Langkah 3: **Target Donasi**" in last_bot_msg:
+        if is_cancel: return "Baik Kak, pengisian formulir dibatalkan. Ada hal lain yang bisa dibantu? 😊"
+        return (
+            "Target donasi dicatat!\n\n"
+            "Langkah 4: **Cerita/Kronologi**.\nMohon ceritakan secara singkat namun jelas mengenai kondisi penerima manfaat."
+        )
+    elif "Langkah 4: **Cerita/Kronologi**" in last_bot_msg:
+        if is_cancel: return "Baik Kak, pengisian formulir dibatalkan. Ada hal lain yang bisa dibantu? 😊"
+        return (
+            "Terima kasih Kak atas informasi kronologinya yang lengkap! 🙏\n\n"
+            "Langkah 5: **Unggah Dokumen Verifikasi & Kirim**.\n\n"
+            "Untuk proses unggah foto pendukung, KTP penggalang dana, dan dokumen pendukung lainnya (seperti dokumen medis atau surat keterangan RT/RW/Aparat Desa), silakan Kakak **menghubungi Customer Service (CS)** kami.\n\n"
+            "Tim kurasi kami akan membantu memverifikasi pengajuan Kakak dalam waktu 1x24 jam. Silakan klik tombol 'Hubungi Kami' atau chat via WhatsApp CS. 🤝✨"
+        )
+        
     intent = classify_intent(text)
     mood = detect_mood(text)
     
@@ -561,10 +631,10 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
         )
     elif intent == "ask_create_campaign":
         return (
-            "Halo Kak! Terima kasih banyak sudah peduli dengan lingkungan sekitar. 💡\n\n"
-            "Untuk saat ini, demi menjaga keamanan dan mencegah penipuan, pembuatan program kampanye galang dana mandiri langsung oleh perorangan umum masih dibatasi melalui proses kurasi yang cukup ketat.\n\n"
-            "Namun, jika Kakak mewakili Yayasan Resmi, LSM, atau Komunitas Sosial berbadan hukum, Kakak bisa mendaftar sebagai Mitra Penggalang Dana dengan mengunggah dokumen legalitas di halaman Mitra Center.\n\n"
-            "Jika ada kasus darurat perorangan di sekitar Kakak yang mendesak, Kakak bisa mengirimkan kronologi lengkap ke tim peninjau kami via email agar kami bantu salurkan ke mitra lapangan terdekat. 🤝"
+            "Halo Kak! Terima kasih banyak atas kepeduliannya. Untuk membuat/mengajukan program donasi (galang dana), caranya sangat mudah kok! 💡\n\n"
+            "Berikut langkah-langkah pengisian formulir penggalangan dana di DonasiCare :\n\n"
+            "Langkah 1: **Pilih Kategori**.\n"
+            "Tentukan apakah donasi untuk Bencana Alam, Medis/Kesehatan, Pendidikan, atau lainnya. Kategori apa yang ingin Kakak pilih?"
         )
     elif intent == "ask_inactive_campaign":
         return (
@@ -667,6 +737,64 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
             "📧 Email: **pr@donasicare.org**\n"
             "📱 WhatsApp Humas: **0812-Media-Care**\n\n"
             "Mari bersama-sama kita sebarluaskan virus kebaikan ke seluruh penjuru negeri! 🇮🇩🎤"
+        )
+    elif intent == "ask_general_donation_guide":
+        return (
+            "Halo Kak! Tentu, saya akan bantu jelaskan secara lengkap tentang sistem donasi di platform DonasiCare. 🌟\n\n"
+            "**DonasiCare** adalah *platform crowdfunding* digital yang memfasilitasi niat baik ribuan orang untuk membantu saudara kita yang sedang kesulitan. "
+            "Sistem kami dirancang agar transparan, cepat, dan 100% aman.\n\n"
+            "**1. Siapa saja yang dibantu?**\n"
+            "Kami memiliki banyak kampanye aktif di berbagai bidang, seperti:\n"
+            "• 📚 Pendidikan (Beasiswa dan fasilitas sekolah)\n"
+            "• 🏥 Kesehatan (Bantuan biaya pengobatan kritis)\n"
+            "• 🆘 Bencana Alam (Tanggap darurat logistik & evakuasi)\n"
+            "• 🌿 Lingkungan (Program penghijauan & kelestarian alam)\n\n"
+            "**2. Bagaimana Cara Berdonasi?**\n"
+            "Caranya sangat praktis:\n"
+            "- Pilih kampanye yang menggerakkan hati Kakak.\n"
+            "- Masukkan nominal donasi (Bisa mulai dari Rp10.000 menggunakan E-Wallet).\n"
+            "- Pilih metode pembayaran (GoPay, DANA, OVO, QRIS, BCA, Mandiri, dll).\n"
+            "- Kakak juga bisa memilih opsi *Anonim (Hamba Allah)* jika tidak ingin nama ditampilkan.\n\n"
+            "**3. Keuntungan Berdonasi di Sini?**\n"
+            "• **Transparansi:** Setiap program wajib memberikan *Update Laporan* berkala berupa foto dan rincian penyaluran dana.\n"
+            "• **E-Sertifikat:** Setiap donasi berhasil, Kakak akan mendapatkan e-Sertifikat penghargaan.\n"
+            "• **Potongan Pajak:** Bukti donasi dari kampanye tertentu bisa digunakan sebagai pengurang PPh di SPT Tahunan.\n"
+            "• **Bebas Potongan Tersembunyi:** Kami tidak menerapkan biaya admin terselubung.\n\n"
+            "Apakah ada informasi spesifik yang ingin Kakak tanyakan lagi? 😊"
+        )
+    elif intent == "ask_donation_behalf":
+        return (
+            "Bisa banget, Kak! Menyedekahkan harta atas nama orang tua atau keluarga yang sudah meninggal dunia (Almarhum/Almarhumah) adalah amal jariyah yang sangat mulia. 🕊️❤️\n\n"
+            "Cara melakukannya di platform kami:\n"
+            "1. Saat mengisi form donasi, pada kolom **Nama Lengkap**, Kakak bisa menuliskan: *'Fulan bin Fulan (Alm)'* atau *'Hamba Allah untuk Ibunda tercinta'*.\n"
+            "2. Kakak juga bisa menuliskan doa khusus di kolom **Pesan / Doa**, agar setiap orang yang membaca halaman kampanye tersebut ikut mengaminkan doa Kakak.\n\n"
+            "InsyaAllah, pahalanya akan langsung mengalir kepada beliau. Aamiin. 🤲"
+        )
+    elif intent == "ask_donation_asset":
+        return (
+            "Wah, niat Kakak sungguh luar biasa! ✨ Untuk saat ini, melalui aplikasi/website DonasiCare, kami hanya memfasilitasi donasi dalam bentuk dana tunai atau transfer saldo.\n\n"
+            "Namun, jika Kakak ingin mendonasikan atau mewakafkan aset bernilai tinggi (seperti emas batangan, surat berharga, tanah, kendaraan, atau properti), "
+            "kami memiliki divisi khusus **Wakaf & Aset Produktif** yang siap membantu.\n\n"
+            "Tim legal kami akan mendampingi proses balik nama, akad syariah, dan penyerahan aset tersebut agar sah secara hukum dan agama. "
+            "Silakan hubungi konsultan wakaf kami melalui email ke: **wakaf@donasicare.org**. 🙏"
+        )
+    elif intent == "ask_verification_process":
+        return (
+            "Ini adalah pertanyaan yang kritis dan sangat kami hargai, Kak! Keamanan dana donatur adalah prioritas tertinggi DonasiCare. 🛡️\n\n"
+            "Untuk mencegah kampanye fiktif atau penipuan, tim **Trust & Safety** kami melakukan verifikasi ketat:\n"
+            "1. **Verifikasi Identitas:** Setiap penggalang dana wajib mengunggah KTP, Swafoto dengan KTP, dan Nomor Rekening atas nama yang sama.\n"
+            "2. **Verifikasi Medis/Lapangan:** Jika kampanyenya adalah bantuan medis, penggalang dana wajib melampirkan rekam medis resmi, surat rujukan rumah sakit, dan estimasi biaya bermaterai.\n"
+            "3. **Survey Langsung:** Untuk pencairan dana di atas limit tertentu, relawan lapangan kami akan melakukan *video call* atau *survey* langsung ke lokasi penerima manfaat.\n\n"
+            "Kami pastikan hanya kampanye yang valid dan mendesak yang bisa tayang di *platform* kami! 🔎"
+        )
+    elif intent == "ask_riba_free":
+        return (
+            "Alhamdulillah, pertanyaan yang sangat baik, Kak! 🕌\n\n"
+            "DonasiCare sangat berkomitmen untuk menjaga kehalalan aliran dana:\n"
+            "1. **Rekening Penampungan Syariah:** Dana donasi, infak, dan zakat dipisahkan ke dalam rekening Bank Syariah yang terbebas dari sistem bunga (riba).\n"
+            "2. **Mitra Payment Gateway:** Biaya transaksi (*payment gateway fee*) yang ditarik murni merupakan biaya layanan teknologi (ujrah), bukan bunga.\n"
+            "3. **Akad yang Jelas:** Setiap pengguna yang berdonasi akan menyetujui *Syarat & Ketentuan* yang didasarkan pada akad *Tabarru'* (tolong-menolong dalam kebaikan).\n\n"
+            "Jadi, Kakak bisa berdonasi, berzakat, atau berinfak dengan hati yang tenang dan berkah. ✨"
         )
 
     # 1. Program Introduction Intents (Statis - Program 1)
@@ -800,42 +928,46 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
 
 
     elif intent == "ask_impact_simulation":
-        matches = re.findall(r"(?:rp|Rp)?\s*(\d{1,3}(?:\.\d{3})*|\d+)", text.lower())
+        text_clean = text.lower().replace(".", "").replace(",", "")
+        matches = re.findall(r"(?:rp)?\s*(\d+)\s*(k|ribu|rb|juta|jt)?", text_clean)
         nom = 0
         if matches:
-            clean_m = matches[0].replace(".", "")
-            if clean_m.isdigit():
-                nom = int(clean_m)
+            for num_str, suffix in matches:
+                val = int(num_str)
+                if suffix in ["k", "ribu", "rb"]:
+                    val *= 1000
+                elif suffix in ["juta", "jt"]:
+                    val *= 1000000
+                elif val < 10000 and "rp" not in text.lower():
+                    val *= 1000
+                
+                if val > nom:
+                    nom = val
                 
         if nom > 0:
-            if nom <= 50000:
-                dampak = (
-                    "🍚 Membantu penyediaan kebutuhan pangan dasar\n"
-                    "👨‍👩‍👧 Membantu 1-2 keluarga penerima manfaat\n"
-                    "❤️ Mendukung distribusi bantuan ke wilayah yang membutuhkan"
-                )
-            elif nom <= 150000:
-                dampak = (
-                    "🍚 Bantuan pangan untuk beberapa keluarga sekaligus\n"
-                    "📚 Dukungan perlengkapan belajar atau sekolah anak\n"
-                    "💧 Memenuhi kebutuhan dasar harian penerima manfaat\n"
-                    "❤️ Menjangkau lebih banyak wilayah yang membutuhkan bantuan"
-                )
-            else:
-                dampak = (
-                    "🏡 Membantu perbaikan fasilitas umum atau penyediaan tempat tinggal sementara\n"
-                    "🎒 Beasiswa dan fasilitas pendidikan lengkap untuk anak kurang mampu\n"
-                    "🩺 Bantuan paket medis dan pengobatan intensif\n"
-                    "🌟 Memberikan dampak jangka panjang yang signifikan bagi komunitas"
-                )
-                
+            buku = max(1, nom // 5000)
+            pensil = max(1, nom // 2000)
+            makan = max(1, nom // 20000)
+            air = max(1, nom // 5000)
+            obat = max(1, nom // 50000)
+            pohon = max(1, nom // 15000)
+            
             return (
-                f"Terima kasih atas niat baik Anda ❤️\n\n"
-                f"Dengan donasi sebesar **Rp {nom:,}**, Anda dapat membantu mendukung program-program kebaikan kami.\n\n"
-                f"Perkiraan dampak dari kebaikan Anda:\n{dampak}\n\n"
-                f"Meskipun nominalnya terlihat sederhana, setiap bantuan ini dapat memberikan manfaat yang luar biasa dan senyuman bagi mereka yang sedang kesulitan. "
-                f"Semakin besar kontribusi yang diberikan, tentu semakin luas dan banyak manfaat yang dapat dirasakan oleh mereka yang membutuhkan.\n\n"
-                f"Apakah Anda ingin mengetahui dampak spesifik untuk program tertentu seperti pendidikan, kesehatan, atau bantuan bencana alam?"
+                f"Luar biasa! 🌟 Dengan donasi sebesar **Rp {nom:,}**, Kakak bisa membawa perubahan besar di berbagai sektor.\n\n"
+                f"Berikut adalah estimasi rincian manfaat yang bisa disalurkan dari donasi Kakak:\n\n"
+                f"📚 **Pendidikan:**\n"
+                f"Menyumbangkan sekitar **{buku} buku tulis** baru atau **{pensil} buah alat tulis/pensil** "
+                f"yang akan sangat membantu anak-anak di pelosok agar tetap bisa sekolah.\n\n"
+                f"🆘 **Bencana Alam:**\n"
+                f"Dapat dikonversi menjadi **{makan} paket makanan siap saji** yang bergizi "
+                f"dan **{air} liter air bersih** untuk para pengungsi korban bencana alam.\n\n"
+                f"🏥 **Kesehatan:**\n"
+                f"Menyediakan **{obat} paket obat-obatan dasar & vitamin** "
+                f"bagi pasien tidak mampu yang kesulitan mendapat akses medis.\n\n"
+                f"🌿 **Lingkungan:**\n"
+                f"Berkontribusi menanam **{pohon} bibit pohon produktif / mangrove** "
+                f"yang akan menghijaukan kembali lahan kritis dan mencegah longsor.\n\n"
+                f"Kakak bebas memilih ke mana dana ini akan difokuskan. Ingin menyalurkannya sekarang? 😊"
             )
         else:
             return (
@@ -847,6 +979,21 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
             
     elif intent == "ask_volunteer":
         return random.choice(VOLUNTEER_RESPONSES)
+        
+    elif intent == "choose_volunteer":
+        return (
+            "Wah, pilihan yang bagus! 🎉\n\n"
+            "Untuk melanjutkan proses pendaftaran sebagai relawan, silakan ketik data diri Kakak dengan format berikut:\n\n"
+            "**Nama Lengkap - Usia - Nomor HP - Pilihan Relawan**\n"
+            "(Contoh: Budi Santoso - 25 - 08123456789 - Relawan Distribusi Pangan)"
+        )
+        
+    elif intent == "fill_volunteer_info":
+        return (
+            "Terima kasih atas semangat kepedulian Kakak! ❤️ Data Kakak sudah kami catat dengan baik di sistem kami.\n\n"
+            "Tim koordinator relawan kami akan segera menghubungi Kakak melalui nomor HP yang diberikan dalam waktu maksimal 2x24 jam untuk proses orientasi dan briefing.\n\n"
+            "Mari bersama-sama kita wujudkan senyum bagi mereka yang membutuhkan! Jika ada pertanyaan lain, jangan ragu untuk bertanya ya."
+        )
         
     elif intent == "ask_about":
         return random.choice(ABOUT_RESPONSES)
