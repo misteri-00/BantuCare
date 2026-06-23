@@ -50,7 +50,7 @@ CAMPAIGNS_DATA = [
         'latitude': -6.4025, 
         'longitude': 106.7942, 
         'status': 'Aktif'
-    }
+    },
 ]
 
 
