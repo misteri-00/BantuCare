@@ -5,11 +5,7 @@ import datetime
 from utils.campaign import get_all_campaigns, get_total_donasi, get_campaign_count, get_campaigns_by_category
 from utils.helpers import format_rupiah, get_donation_count
 
-# ═══════════════════════════════════════════════════════════════════════
-# DonasiCare – Smart Chatbot Engine (Pure Python, No External API)
-# Features: Intent classification, sentiment detection, context memory,
-#           randomized natural responses, campaign data integration
-# ═══════════════════════════════════════════════════════════════════════
+
 
 DETAILED_PROGRAMS = {
     "banjir_demak": {
@@ -64,308 +60,302 @@ DETAILED_PROGRAMS = {
     }
 }
 
-# ── Intent Patterns ───────────────────────────────────────────────────
-INTENT_PATTERNS = {
-    "greeting": [
-        r"\b(halo|hai|hi|hey|helo|assalamualaikum)\b",
-        r"\b(selamat|pagi|siang|sore|malam)\b"
-    ],
-    "farewell": [
-        r"\b(bye|dadah|sampai jumpa|selamat tinggal)\b",
-        r"\b(terima kasih|makasih|thanks|thank you|suwun)\b"
-    ],
-    
-    # ── Detail Program Utama (Program Static) ───────────────────────────
-    "ask_disaster_detail": [
-        r"\b(banjir demak)\b", 
-        r"detail.*banjir", 
-        r"info.*banjir", 
-        r"tentang.*banjir.*demak"
-    ],
-    "ask_education_detail": [
-        r"(program|bantuan|detail|info).*(pendidikan|beasiswa|sekolah)",
-        r"(pendidikan|beasiswa|sekolah).*(program|bantuan|detail|info)",
-        r"tentang.*(pendidikan|beasiswa|sekolah)"
-    ],
-    "ask_health_detail": [
-        r"(program|bantuan|detail|info).*(kesehatan|medis|pengobatan|sakit)",
-        r"(kesehatan|medis|pengobatan|sakit).*(program|bantuan|detail|info)",
-        r"tentang.*(kesehatan|medis|pengobatan|sakit)"
-    ],
-    "ask_environment_detail": [
-        r"(program|bantuan|detail|info).*(lingkungan|penghijauan|pohon|alam)",
-        r"(lingkungan|penghijauan|pohon|alam).*(program|bantuan|detail|info)",
-        r"tentang.*(lingkungan|penghijauan|pohon|alam)"
-    ],
-    
-    # ── Pertanyaan Kontekstual Program (Mendukung Follow-up Pendek) ──
-    "ask_date_time": [
-        r"\bkapan\b",
-        r"\b(tanggal|waktu|hari|jam)\b",
-        r"kapan.*(terjadi|mulai|kejadian)",
-        r"(tanggal|waktu).*(kejadian|mulai)"
-    ],
-    "ask_location": [
-        r"\b(dimana|di mana|mana|lokasi|wilayah|tempat|daerah)\b",
-        r"lokasi.*terdampak",
-        r"di.*mana.*kejadian"
-    ],
-    "ask_victim_count": [
-        r"\bberapa\b.*\b(korban|jiwa|orang|anak|siswa|keluarga|pengungsi|pasien)\b",
-        r"\bjumlah\b.*\b(korban|jiwa|orang|anak|siswa|keluarga|pengungsi|pasien)\b",
-        r"\b(berapa|jumlah)\s+(korban|jiwa|terdampak|pengungsi)\b",
-        r"\b(korban|jiwa|pengungsi|penerima manfaat)\b"
-    ],
-    "ask_needs": [
-        r"\b(kebutuhan|dibutuhkan|perlu|diperlukan|mendesak|logistik)\b",
-        r"butuh\s+apa",
-        r"apa\s+saja\s+yang\s+diperlukan"
-    ],
-    
-    # ── Simulasi Dampak Berdasarkan Nominal (Score-Boosted) ────────────
-    "ask_impact_100k": [
-        r"\b100(\.000)?\b",
-        r"100\s*(ribu|rb)",
-        r"seratus\s*ribu",
-        r"donasi.*100",
-        r"dampak.*100",
-        r"bantuan.*100"
-    ],
-    "ask_impact_500k": [
-        r"\b500(\.000)?\b",
-        r"500\s*(ribu|rb)",
-        r"lima\s*ratus\s*ribu",
-        r"donasi.*500",
-        r"dampak.*500",
-        r"bantuan.*500"
-    ],
-    "ask_impact_simulation": [
-        r"(jika|kalau|misal|seandainya|dampak|manfaat|bantuan).*(donasi|berdonasi|menyumbang|sumbang).*(rp|Rp)?\s*(\d+)",
-        r"(rp|Rp)\s*\d+",
-        r"\b\d+\s*(ribu|rb|juta|jt)\b",
-        r"nominal.*\d+"
-    ],
 
-    # ── Statistik & Kategori Kampanye Dinamis ──────────────────────────
-    "ask_total_donation": [
-        r"(total|berapa|jumlah).*(donasi|dana|uang|terkumpul|sumbangan)",
-        r"(dana|donasi|uang|sumbangan).*(terkumpul|masuk|diterima|total)",
-        r"sudah\s+(berapa|terkumpul)",
-        r"total\s+dana"
-    ],
-    "ask_program_count": [
-        r"(berapa|jumlah|ada|daftar).*(program|kampanye|kegiatan|proyek|opsi)",
-        r"(program|kampanye|kegiatan|proyek).*(berapa|aktif|jumlah|banyak)",
-        r"berapa\s+program",
-        r"jumlah\s+kampanye"
-    ],
-    "ask_donor_count": [
-        r"(berapa|jumlah|ada).*(donatur|penyumbang|orang|donor)",
-        r"(donatur|penyumbang|donor).*(berapa|jumlah|banyak)",
-        r"berapa\s+donatur",
-        r"jumlah\s+penyumbang"
-    ],
-    
-    # Intent khusus mencari kategori dinamis (Diwajibkan ada keyword pencarian)
-    "search_education": [
-        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(pendidikan|sekolah|beasiswa|belajar|siswa)",
-        r"(pendidikan|sekolah|beasiswa|belajar|siswa).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
-        r"kategori\s+pendidikan"
-    ],
-    "search_health": [
-        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(kesehatan|medis|sakit|obat|dokter|klinik)",
-        r"(kesehatan|medis|sakit|obat|dokter|klinik).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
-        r"kategori\s+kesehatan"
-    ],
-    "search_disaster": [
-        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(bencana|banjir|gempa|longsor|kebakaran)",
-        r"(bencana|banjir|gempa|longsor|kebakaran).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
-        r"kategori\s+(bencana|alam)"
-    ],
-    "search_environment": [
-        r"(cari|lihat|daftar|kategori|tampilkan|semua|kumpulan|jelajahi).*(lingkungan|hutan|mangrove|sampah|alam)",
-        r"(lingkungan|hutan|mangrove|sampah|alam).*(cari|lihat|daftar|kategori|tampilkan|kumpulan|jelajahi)",
-        r"kategori\s+lingkungan"
-    ],
-    
-    # ── Prosedur Platform & Informasi Umum ─────────────────────────────
-    "ask_how_to_donate": [
-        r"(cara|gimana|bagaimana|langkah|step|panduan).*(donasi|bayar|sumbang|transfer|bantu|berdonasi)",
-        r"(donasi|bayar|sumbang|transfer|berdonasi).*(cara|gimana|bagaimana|langkah|panduan)",
-        r"(bisa|mau|ingin|pengen|cara).*(donasi|sumbang|bantu|bayar|berdonasi|menyumbang)",
-        r"prosedur.*(donasi|menyumbang)"
-    ],
-    "ask_payment_method": [
-        r"(metode|jenis|pilihan|opsi|apa saja).*(bayar|pembayaran|transfer)",
-        r"(pay|pembayaran|transfer).*(metode|jenis|pilihan|pake|pakai|lewat|via|melalui)",
-        r"\b(gopay|ovo|dana|qris|bca|mandiri|bni|bri|linkaja|shopeepay|transfer)\b"
-    ],
-    "ask_transparency": [
-        r"(transparan|laporan|bukti|audit|akuntabel|jujur|terbuka)",
-        r"(dana|uang|donasi).*(digunakan|disalurkan|dipakai|kemana|ke mana|larinya)",
-        r"(kemana|ke mana).*(uang|dana|donasi|penyaluran)"
-    ],
-    "ask_security": [
-        r"(aman|keamanan|terpercaya|penipuan|bodong|percaya|legal|resmi|izin)",
-        r"apakah.*(aman|penipuan|beneran)"
-    ],
-    "ask_volunteer": [
-        r"\b(volunteer|relawan|sukarelawan)\b",
-        r"(jadi|mau|ingin|pengen|gabung|daftar|bergabung).*(relawan|volunteer|sukarelawan)",
-        r"cara.*(jadi|gabung).*relawan"
-    ],
-    "choose_volunteer": [
-        r"(pilih|mau|daftar|ikut).*(distribusi|guru|medis|pangan|pelosok|darurat)",
-        r"\b(distribusi|guru\s+relawan|medis|pendidikan|bencana)\b"
-    ],
-    "fill_volunteer_info": [
+INTENT_PRIORITY = [
+    # ─── TIER 1: State-Machine / Form Flows (paling spesifik) ─────────
+    ("fill_volunteer_info", [
         r"[a-zA-Z\s]+\s*-\s*\d{1,2}\s*-\s*(08\d+|\+62\d+)\s*-\s*[a-zA-Z\s]+",
-        r"(nama|umur|usia|no\s+hp|nomor).*(nama|umur|usia|no\s+hp|nomor)",
-        r"(nama\s*:|umur\s*:|hp\s*:|wa\s*:)"
-    ],
-    "ask_about": [
-        r"(apa itu|tentang|mengenai|jelaskan|profil).*(donasicare|platform|organisasi|yayasan|apps|aplikasi)",
-        r"(siapa|apa).*(donasicare|kalian|kamu|anda|carebot)"
-    ],
-    "ask_recommendation": [
-        r"(rekomendasi|rekomen|saran|sarankan|suggest|rekomendasikan)",
-        r"(program|kampanye|donasi).*(terbaik|populer|unggulan|favorit|bagus|mendesak)",
-        r"(mau|ingin|pengen).*(donasi|bantu|sumbang).*(apa|mana|kemana|ke mana)"
-    ],
-    "positive_sentiment": [
-        r"\b(bagus|keren|mantap|hebat|luar biasa|amazing|wow|good|great|suka|senang|terbantu)\b"
-    ],
-    "negative_sentiment": [
-        r"\b(jelek|buruk|mengecewakan|kecewa|tidak suka|benci|marah|kesal|lelet|lambat|error|bug)\b"
-    ],
+        r"(nama\s*:|umur\s*:|hp\s*:|wa\s*:).*(nama\s*:|umur\s*:|hp\s*:|wa\s*:)",
+    ]),
+    ("choose_volunteer", [
+        r"(pilih|mau|daftar|ikut)\s+.*(distribusi\s+pangan|guru\s+relawan|relawan\s+medis)",
+        r"\b(distribusi\s+pangan|guru\s+relawan|relawan\s+medis)\b",
+    ]),
 
-    # ✨ ═══════════════════════════════════════════════════════════════
-    # 💥 EXTENDED SCENARIO INTENTS (ADDED)
-    # ═══════════════════════════════════════════════════════════════════
-    "ask_general_donation_guide": [
-        r"(panduan|informasi|penjelasan|detail).*(donasi|menyumbang|beramal)",
-        r"(pengen|ingin).*(tahu|paham).*(semua|banyak|lengkap).*(donasi)",
-        r"ceritakan.*(tentang donasi|proses donasi)"
-    ],
-    "ask_donation_behalf": [
+    # ─── TIER 2: Pertanyaan Donasi Spesifik (frasa panjang & unik) ───
+    ("ask_refund_donation", [
+        r"salah.*(nominal|transfer|kirim|donasi|input|ketik)",
+        r"salah\s+(ngetik|ketik)",
+        r"\b(refund)\b",
+        r"tarik\s+dana",
+        r"uang\s+kembali",
+        r"kembalikan\s+dana",
+        r"batal\s+donasi",
+    ]),
+    ("ask_cancel_monthly", [
+        r"(batal|berhenti|stop|cancel|hapus).*(rutin|autodebet|berlangganan|tiap\s+bulan)",
+    ]),
+    ("ask_monthly_donation", [
+        r"donasi.*(rutin|bulanan|tiap\s+bulan|berlangganan)",
+        r"\b(rutinan|autodebet)\b",
+        r"setiap\s+bulan.*donasi",
+    ]),
+    ("ask_payment_issue", [
+        r"(belum\s+masuk|pending|gagal|bermasalah).*(donasi|transfer|pembayaran|saldo)",
+    ]),
+    ("ask_forgot_anonymous", [
+        r"lupa.*(hamba\s+allah|sembunyi|anonim|nama.*muncul|hapus.*nama)",
+        r"ingin.*ubah.*anonim",
+    ]),
+    ("ask_donation_behalf", [
         r"(donasi|sumbang|sedekah).*(atas\s+nama|untuk|buat|wakilkan).*(orang\s+lain|almarhum|orang\s+tua|keluarga)",
-        r"bisa.*(atas\s+nama).*(almarhum)"
-    ],
-    "ask_donation_asset": [
+        r"bisa.*(atas\s+nama).*(almarhum)",
+    ]),
+    ("ask_donation_asset", [
         r"(donasi|sumbang|wakaf).*(aset|tanah|bangunan|emas|saham|kendaraan)",
-        r"bisa.*(donasi|wakaf).*(tanah|rumah)"
-    ],
-    "ask_verification_process": [
-        r"(verifikasi|cek|validasi).*(mitra|lapangan|kampanye|program|penerima)",
-        r"mencegah.*(penipuan|fiktif)"
-    ],
-    "ask_riba_free": [
-        r"(bebas|tanpa).*(riba|bunga|potongan\s+bank)",
-        r"apakah.*(halal|syariah).*(donasi|sistem|platform)"
-    ],
-    "ask_refund_donation": [
-        r"(salah.*(nominal|transfer|kirim|donasi|input|ketik))",
-        r"(salah\s+(ngetik|ketik))",
-        r"(batal|refund|tarik|kembali)",
-        r"(bisa.*(batal|refund|kembali|tarik|salah))"
-    ],
-    "ask_tax_deduction": [
-        r"(potong.*pajak|pengurang.*pajak|insentif.*pajak)",
-        r"(bukti.*(pajak|spt|pajak))",
-        r"\bpajak\b"
-    ],
-    "ask_zakat_infak": [
-        r"\b(zakat|infaq|infak|sedekah|shodaqoh|fitrah|maal)\b",
-        r"bisa.*(zakat|infak|sedekah)"
-    ],
-    "ask_corporate_partnership": [
-        r"(kerjasama|mitra|partnership|kolaborasi|csr|perusahaan|instansi|komunitas)",
-        r"atas\s+nama\s+(pt|perusahaan|komunitas)"
-    ],
-    "ask_receipt_invoice": [
-        r"(kuitansi|kwitansi|nota|invoice|sertifikat|e-sertifikat|bukti.*donasi)"
-    ],
-    "ask_monthly_donation": [
-        r"(donasi.*(rutin|bulanan|tiap bulan|berlangganan))",
-        r"(rutinan|autodebet|setiap\s+bulan)"
-    ],
-    "ask_create_campaign": [
+        r"bisa.*(donasi|wakaf).*(tanah|rumah)",
+    ]),
+    ("ask_goods_donation", [
+        r"(donasi|sumbang|bantu).*(barang|baju|pakaian|makanan|buku|sembako)",
+        r"bisa\s+pakai\s+barang",
+    ]),
+    ("ask_create_campaign", [
         r"(buat|buka|galang|bikin).*(dana|kampanye|open\s+donasi|fundraising)",
-        r"cara\s+galang\s+dana\s+sendiri"
-    ],
-    "ask_inactive_campaign": [
+        r"cara\s+galang\s+dana\s+sendiri",
+    ]),
+    ("ask_inactive_campaign", [
         r"(kalau|jika).*(tidak.*tercapai|kurang|sisa|target.*tidak)",
         r"target.*dana.*kurang",
-        r"bagaimana.*dana.*tidak.*terpenuhi"
-    ],
-    "ask_goods_donation": [
-        r"(donasi|sumbang|bantu).*(barang|baju|pakaian|makanan|buku|sembako)",
-        r"bisa\s+pakai\s+barang"
-    ],
-    "ask_forgot_anonymous": [
-        r"(lupa.*(hamba\s+allah|sembunyi|anonim|nama.*muncul|hapus.*nama))",
-        r"ingin.*ubah.*anonim"
-    ],
-    "ask_legality": [
-        r"(legalitas|izin|resmi|terdaftar|penipuan|terpercaya|valid|kemensos)"
-    ],
-    "ask_minimum_donation": [
-        r"(minimal|paling\s+kecil|batas\s+bawah).*(donasi|sumbang|transfer)"
-    ],
-    "ask_cancel_monthly": [
-        r"(batal|berhenti|stop|cancel|hapus).*(rutin|autodebet|berlangganan|tiap\s+bulan)"
-    ],
-    "ask_payment_issue": [
-        r"(belum\s+masuk|pending|gagal|error|bermasalah).*(donasi|transfer|pembayaran|saldo)"
-    ],
-    "ask_change_profile": [
-        r"(ubah|ganti|edit|update).*(profil|nama|akun|password|email|nomor)"
-    ],
-    "ask_annual_report": [
-        r"(laporan|report|transparansi|bukti).*(tahunan|penyaluran|penggunaan\s+dana)"
-    ],
-    "ask_event_invitation": [
-        r"(undang|seminar|acara|narasumber|speaker|kunjungan).*(yayasan|donasicare)"
-    ],
-    "ask_data_privacy": [
-        r"(aman|privasi|bocor|data\s+pribadi|ktp|hack)"
-    ],
-    "ask_emergency_help": [
-        r"(darurat|mendesak|kritis|sekarat|butuh\s+bantuan\s+sekarang|tolong\s+segera)"
-    ],
-    "ask_collab_media": [
-        r"(media|jurnalis|liputan|wawancara|press\s+release|berita)"
-    ]
-}
+        r"bagaimana.*dana.*tidak.*terpenuhi",
+    ]),
+    ("ask_minimum_donation", [
+        r"(minimal|paling\s+kecil|batas\s+bawah).*(donasi|sumbang|transfer)",
+    ]),
+    ("ask_receipt_invoice", [
+        r"\b(kuitansi|kwitansi|nota|invoice|e-sertifikat)\b",
+        r"bukti.*(donasi|pembayaran|transfer)",
+    ]),
+    ("ask_tax_deduction", [
+        r"(potong|pengurang|insentif).*pajak",
+        r"bukti.*(pajak|spt)",
+        r"\bpajak\b",
+    ]),
+    ("ask_zakat_infak", [
+        r"\b(zakat|infaq|infak|shodaqoh|fitrah|maal)\b",
+        r"bisa.*(zakat|infak|sedekah)",
+    ]),
+    ("ask_riba_free", [
+        r"(bebas|tanpa).*(riba|bunga|potongan\s+bank)",
+        r"apakah.*(halal|syariah).*(donasi|sistem|platform)",
+    ]),
+    ("ask_verification_process", [
+        r"(verifikasi|cek|validasi).*(mitra|lapangan|kampanye|program|penerima)",
+        r"mencegah.*(penipuan|fiktif)",
+    ]),
+    ("ask_corporate_partnership", [
+        r"\b(partnership|kolaborasi|csr)\b",
+        r"(kerjasama|mitra).*(perusahaan|instansi|komunitas|yayasan)",
+        r"atas\s+nama\s+(pt|perusahaan|komunitas)",
+    ]),
+    ("ask_change_profile", [
+        r"(ubah|ganti|edit|update).*(profil|nama|akun|password|email|nomor)",
+    ]),
+    ("ask_annual_report", [
+        r"(laporan|report).*(tahunan|penyaluran|penggunaan\s+dana)",
+    ]),
+    ("ask_event_invitation", [
+        r"(undang|seminar|acara|narasumber|speaker|kunjungan).*(yayasan|donasicare)",
+    ]),
+    ("ask_collab_media", [
+        r"\b(jurnalis|liputan|wawancara|press\s+release)\b",
+        r"(media|berita).*(donasicare|yayasan|wawancara)",
+    ]),
+    ("ask_data_privacy", [
+        r"(privasi|bocor|hack).*data",
+        r"data\s+pribadi.*(aman|bocor)",
+        r"\b(ktp)\b.*(aman|bocor|hack)",
+    ]),
+    ("ask_emergency_help", [
+        r"\b(darurat|sekarat)\b",
+        r"butuh\s+bantuan\s+sekarang",
+        r"tolong\s+segera",
+    ]),
+    ("ask_general_donation_guide", [
+        r"(panduan|penjelasan).*(cara|proses|sistem|alur).*(donasi|menyumbang|beramal)",
+        r"(pengen|ingin).*(tahu|paham).*(cara|proses|langkah|alur).*(donasi)",
+        r"ceritakan.*(tentang\s+donasi|proses\s+donasi)",
+        r"bagaimana.*(sistem|alur|proses).*(donasi|sumbangan)",
+    ]),
+
+    # ─── TIER 3: Daftar Semua Program / Kampanye ─────────────────────
+    ("ask_all_campaigns", [
+        r"(daftar|list).*(donasi|kampanye|program)",
+        r"(tampilkan|tunjukkan).*(donasi|kampanye|program)",
+        r"(ingin|mau|pengen).*(tahu|ketahui|lihat|mengetahui).*(semua|seluruh|daftar).*(donasi|program|kampanye)",
+        r"semua.*(donasi|program|kampanye)",
+        r"(donasi|program|kampanye).*apa\s+saja",
+        r"(donasi|program|kampanye).*(yang\s+ada|tersedia|aktif)",
+    ]),
+
+    # ─── TIER 4: Detail Program Statis ───────────────────────────────
+    ("ask_disaster_detail", [
+        r"\b(banjir\s+demak)\b",
+        r"(detail|info).*banjir",
+        r"tentang.*banjir.*demak",
+    ]),
+    ("ask_education_detail", [
+        r"(program|bantuan|detail|info).*(pendidikan|beasiswa|sekolah)",
+        r"(pendidikan|beasiswa|sekolah).*(program|bantuan|detail|info)",
+        r"tentang.*(pendidikan|beasiswa|sekolah)",
+    ]),
+    ("ask_health_detail", [
+        r"(program|bantuan|detail|info).*(kesehatan|medis|pengobatan|sakit)",
+        r"(kesehatan|medis|pengobatan|sakit).*(program|bantuan|detail|info)",
+        r"tentang.*(kesehatan|medis|pengobatan|sakit)",
+    ]),
+    ("ask_environment_detail", [
+        r"(program|bantuan|detail|info).*(lingkungan|penghijauan|pohon)",
+        r"(lingkungan|penghijauan|pohon).*(program|bantuan|detail|info)",
+        r"tentang.*(lingkungan|penghijauan|pohon)",
+    ]),
+
+    # ─── TIER 5: Pencarian per Kategori ──────────────────────────────
+    ("search_education", [
+        r"(cari|kategori|jelajahi).*(pendidikan|sekolah|beasiswa|belajar|siswa)",
+        r"(pendidikan|sekolah|beasiswa).*(cari|kategori|jelajahi)",
+        r"kategori\s+pendidikan",
+    ]),
+    ("search_health", [
+        r"(cari|kategori|jelajahi).*(kesehatan|medis|sakit|obat|dokter|klinik)",
+        r"(kesehatan|medis|sakit).*(cari|kategori|jelajahi)",
+        r"kategori\s+kesehatan",
+    ]),
+    ("search_disaster", [
+        r"(cari|kategori|jelajahi).*(bencana|banjir|gempa|longsor|kebakaran)",
+        r"(bencana|banjir|gempa|longsor).*(cari|kategori|jelajahi)",
+        r"kategori\s+(bencana|alam)",
+    ]),
+    ("search_environment", [
+        r"(cari|kategori|jelajahi).*(lingkungan|hutan|mangrove|sampah)",
+        r"(lingkungan|hutan|mangrove).*(cari|kategori|jelajahi)",
+        r"kategori\s+lingkungan",
+    ]),
+
+    # ─── TIER 6: Statistik & Info Umum ───────────────────────────────
+    ("ask_total_donation", [
+        r"(total|jumlah).*(donasi|dana|uang|terkumpul|sumbangan)",
+        r"(dana|donasi|uang|sumbangan).*(terkumpul|masuk|diterima|total)",
+        r"sudah\s+(berapa|terkumpul)",
+        r"total\s+dana",
+    ]),
+    ("ask_program_count", [
+        r"(berapa|jumlah).*(program|kampanye|kegiatan|proyek)",
+        r"(program|kampanye).*(berapa|jumlah|banyak)",
+        r"berapa\s+program",
+        r"jumlah\s+kampanye",
+    ]),
+    ("ask_donor_count", [
+        r"(berapa|jumlah).*(donatur|penyumbang|donor)",
+        r"(donatur|penyumbang|donor).*(berapa|jumlah|banyak)",
+        r"berapa\s+donatur",
+        r"jumlah\s+penyumbang",
+    ]),
+    ("ask_legality", [
+        r"\b(legalitas|kemensos)\b",
+        r"apakah.*(resmi|terdaftar|legal|terpercaya)",
+    ]),
+
+    # ─── TIER 7: Prosedur Platform ───────────────────────────────────
+    ("ask_how_to_donate", [
+        r"(cara|gimana|bagaimana|langkah|step|panduan).*(donasi|bayar|sumbang|transfer|bantu|berdonasi)",
+        r"(donasi|bayar|sumbang|transfer|berdonasi).*(cara|gimana|bagaimana|langkah|panduan)",
+        r"prosedur.*(donasi|menyumbang)",
+    ]),
+    ("ask_payment_method", [
+        r"(metode|jenis|pilihan|opsi).*(bayar|pembayaran|transfer)",
+        r"(pembayaran|transfer).*(metode|jenis|pilihan|pake|pakai|lewat|via|melalui)",
+        r"\b(gopay|ovo|qris|linkaja|shopeepay)\b",
+    ]),
+    ("ask_transparency", [
+        r"\b(transparan|akuntabel)\b",
+        r"(dana|uang|donasi).*(digunakan|disalurkan|dipakai|kemana|ke\s+mana|larinya)",
+        r"(kemana|ke\s+mana).*(uang|dana|donasi|penyaluran)",
+    ]),
+    ("ask_security", [
+        r"apakah.*(aman|penipuan|beneran)",
+        r"\b(keamanan|terpercaya|bodong)\b",
+    ]),
+    ("ask_volunteer", [
+        r"\b(volunteer|relawan|sukarelawan)\b",
+        r"(jadi|gabung|bergabung).*(relawan|volunteer|sukarelawan)",
+        r"cara.*(jadi|gabung).*relawan",
+    ]),
+    ("ask_about", [
+        r"(apa\s+itu|mengenai|jelaskan|profil).*(donasicare|platform|organisasi|yayasan|apps|aplikasi)",
+        r"(siapa|apa).*(donasicare|kalian|kamu|anda|carebot)",
+    ]),
+
+    # ─── TIER 8: Dampak Nominal (paling mudah tabrakan dgn angka) ────
+    ("ask_impact_100k", [
+        r"(donasi|dampak|bantuan|manfaat).*\b100(\.?000)?\b",
+        r"\b100\s*(ribu|rb)\b",
+        r"seratus\s*ribu",
+    ]),
+    ("ask_impact_500k", [
+        r"(donasi|dampak|bantuan|manfaat).*\b500(\.?000)?\b",
+        r"\b500\s*(ribu|rb)\b",
+        r"lima\s*ratus\s*ribu",
+    ]),
+    ("ask_impact_simulation", [
+        r"(jika|kalau|misal|seandainya|dampak|manfaat).*(donasi|berdonasi|menyumbang|sumbang).*(rp|Rp)?\s*\d+",
+        r"(rp|Rp)\s*\d+",
+        r"\b\d+\s*(ribu|rb|juta|jt)\b",
+        r"nominal.*\d+",
+    ]),
+
+    # ─── TIER 9: Follow-up Kontekstual (kata pendek, butuh context) ──
+    ("ask_date_time", [
+        r"\bkapan\b",
+        r"(tanggal|waktu).*(kejadian|mulai)",
+        r"kapan.*(terjadi|mulai|kejadian)",
+    ]),
+    ("ask_location", [
+        r"\b(dimana|di\s+mana)\b",
+        r"lokasi.*(terdampak|bencana|program)",
+        r"di.*mana.*(kejadian|bencana)",
+    ]),
+    ("ask_victim_count", [
+        r"\bberapa\b.*\b(korban|jiwa|pengungsi|pasien)\b",
+        r"\bjumlah\b.*\b(korban|jiwa|pengungsi|pasien)\b",
+    ]),
+    ("ask_needs", [
+        r"\b(kebutuhan|dibutuhkan|diperlukan|logistik)\b",
+        r"butuh\s+apa",
+        r"apa\s+saja\s+yang\s+diperlukan",
+    ]),
+
+    # ─── TIER 10: Sentimen (paling umum, paling bawah) ───────────────
+    ("negative_sentiment", [
+        r"\b(jelek|buruk|mengecewakan|kecewa|tidak\s+suka|benci|marah|kesal)\b",
+    ]),
+    ("positive_sentiment", [
+        r"\b(bagus|keren|mantap|hebat|luar\s+biasa|amazing|wow|good|great|suka|senang|terbantu)\b",
+    ]),
+
+    # ─── TIER 11: Sapaan & Pamit (paling generik) ────────────────────
+    ("greeting", [
+        r"\b(halo|hai|hi|hey|helo|assalamualaikum)\b",
+    ]),
+    ("farewell", [
+        r"\b(bye|dadah|sampai\s+jumpa|selamat\s+tinggal)\b",
+        r"\b(terima\s+kasih|makasih|thanks|thank\s+you|suwun)\b",
+    ]),
+]
 
 def classify_intent(text: str) -> str:
-    """Klasifikasikan intent dari teks pengguna menggunakan regex pattern matching."""
+    """
+    Klasifikasikan intent dari teks pengguna menggunakan priority-ordered
+    first-match. Intent yang lebih spesifik diletakkan lebih atas dalam
+    daftar INTENT_PRIORITY sehingga selalu menang tanpa perlu skor.
+    """
     text_lower = text.lower().strip()
-    scores = {}
-    for intent, patterns in INTENT_PATTERNS.items():
-        score = 0
+
+    for intent, patterns in INTENT_PRIORITY:
         for pattern in patterns:
-            matches = re.findall(pattern, text_lower)
-            score += len(matches)
-        
-        # Berikan bobot ekstra untuk intent spesifik agar tidak tertutup oleh angka donasi
-        if intent in ["ask_refund_donation", "ask_tax_deduction", "ask_zakat_infak", 
-                      "ask_corporate_partnership", "ask_receipt_invoice", "ask_monthly_donation", 
-                      "ask_create_campaign", "ask_inactive_campaign", "ask_goods_donation", 
-                      "ask_forgot_anonymous", "negative_sentiment",
-                      "ask_legality", "ask_minimum_donation", "ask_cancel_monthly", 
-                      "ask_payment_issue", "ask_change_profile", "ask_annual_report", 
-                      "ask_event_invitation", "ask_data_privacy", "ask_emergency_help", "ask_collab_media",
-                      "choose_volunteer", "fill_volunteer_info", "ask_general_donation_guide",
-                      "ask_donation_behalf", "ask_donation_asset", "ask_verification_process", "ask_riba_free"]:
-            score *= 1000
-            
-        if score > 0:
-            scores[intent] = score
-    
-    if not scores:
-        return "unknown"
-    return max(scores, key=scores.get)
+            if re.search(pattern, text_lower):
+                return intent
+
+    return "unknown"
 
 def detect_mood(text: str) -> str:
     """Deteksi mood/sentimen sederhana dari teks."""
@@ -498,18 +488,17 @@ def _build_campaign_response(kategori: str, intro: str) -> str:
     response += "Kunjungi halaman **Donasi Sekarang** untuk mulai membantu! 💛"
     return response
 
-def _build_recommendation_response() -> str:
+def _build_all_campaigns_response() -> str:
     campaigns = get_all_campaigns()
     if not campaigns:
         return "Maaf, belum ada program kampanye yang tersedia saat ini."
     
-    sorted_campaigns = sorted(campaigns, key=lambda c: c.get('dana_terkumpul', 0), reverse=True)[:3]
-    response = "Berikut **3 program unggulan** kami yang paling banyak mendapat dukungan: 🏆\n\n"
-    for i, c in enumerate(sorted_campaigns, 1):
+    response = "Berikut adalah **daftar seluruh program donasi** yang ada di DonasiCare saat ini: 📋\n\n"
+    for i, c in enumerate(campaigns, 1):
         progress = min(int((c['dana_terkumpul'] / c['target_dana']) * 100), 100) if c['target_dana'] > 0 else 0
         response += f"**{i}. {c['judul']}** ({c['kategori']})\n"
         response += f"   Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n"
-    response += "Anda bisa melihat detail lengkapnya di halaman **Program Donasi**."
+    response += "Anda bisa mengeklik tombol **Donasi Sekarang** di sebelah kiri untuk mulai membantu! 💛"
     return response
 
 # ── Smart Response Generator ──────────────────────────────────────────
@@ -998,8 +987,8 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
     elif intent == "ask_about":
         return random.choice(ABOUT_RESPONSES)
         
-    elif intent == "ask_recommendation":
-        return random.choice(["Tentu, saya punya beberapa saran nih! ", "Ini dia program-program pilihan kami: ", "Berdasarkan data kami, "]) + _build_recommendation_response()
+    elif intent == "ask_all_campaigns":
+        return random.choice(["Tentu, ini daftar programnya: \n\n", "Berikut adalah semua program donasi kami: \n\n", "Silakan lihat daftar donasi berikut: \n\n"]) + _build_all_campaigns_response()
         
     elif intent == "positive_sentiment":
         return random.choice(POSITIVE_RESPONSES)

@@ -133,7 +133,6 @@ def render_inline_donation_form(key_index):
 
     elif st.session_state[step_key] == 3:
         st.success("✅ Pembayaran berhasil dikonfirmasi! Terima kasih atas kebaikan Anda.")
-        st.balloons()
         if st.button("📜 Lihat Riwayat Donasi", key=f"btn_riwayat_{key_index}"):
             st.switch_page("pages/riwayatdonasi.py")
                 
@@ -292,23 +291,23 @@ def inject_css():
         50% { opacity: .5; transform: scale(.85); }
     }
 
-    /* ══ CHAT BUBBLES ══ */
+    /* ══ CHAT MESSAGES (NO BUBBLES) ══ */
     [data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
         padding: .6rem 0 !important;
     }
     [data-testid="stChatMessage"][data-testid-role="assistant"] > div:last-child {
-        background: rgba(20,34,20,.6) !important;
-        border: .5px solid rgba(201,168,76,.15) !important;
-        border-radius: 2px 14px 14px 14px !important;
-        padding: .9rem 1.1rem !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: .4rem 0 !important;
     }
     [data-testid="stChatMessage"][data-testid-role="user"] > div:last-child {
-        background: rgba(201,168,76,.1) !important;
-        border: .5px solid rgba(201,168,76,.25) !important;
-        border-radius: 14px 14px 2px 14px !important;
-        padding: .9rem 1.1rem !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: .4rem 0 !important;
     }
     [data-testid="stChatMessage"] p {
         color: #d0dcc8 !important;
@@ -367,11 +366,6 @@ def inject_css():
 
 
 
-
-
-# ══════════════════════════════════════════════════════════════════════
-# NATIVE STREAMLIT CHAT UI
-# ══════════════════════════════════════════════════════════════════════
 
 
 
