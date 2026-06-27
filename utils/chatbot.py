@@ -8,14 +8,14 @@ from utils.helpers import format_rupiah, get_donation_count
 
 
 DETAILED_PROGRAMS = {
-    "banjir_demak": {
-        "id": "banjir_demak",
-        "judul": "Banjir Demak 2026",
+    "banjir_jawa_barat": {
+        "id": "banjir_jawa_barat",
+        "judul": "Banjir Jawa Barat 2026",
         "kategori": "Bencana Alam",
         "tanggal_kejadian": "5 Juni 2026",
         "waktu_kejadian": "02.15 WIB",
-        "deskripsi": "Banjir terjadi akibat curah hujan tinggi dan meluapnya Sungai Wulan yang menyebabkan genangan di beberapa wilayah Kabupaten Demak. Curah hujan ekstrem berlangsung selama kurang lebih 8 jam.",
-        "wilayah_terdampak": ["Kecamatan Karanganyar", "Kecamatan Gajah", "Kecamatan Sayung", "Kecamatan Bonang", "Kecamatan Mijen"],
+        "deskripsi": "Banjir terjadi akibat curah hujan tinggi yang menyebabkan genangan di beberapa wilayah Jawa Barat. Curah hujan ekstrem berlangsung selama kurang lebih 8 jam.",
+        "wilayah_terdampak": ["Kabupaten Bandung", "Kabupaten Garut", "Kabupaten Sumedang", "Kota Bandung", "Kabupaten Tasikmalaya"],
         "detail_wilayah": "37 desa terdampak dengan ketinggian air 30 cm hingga 150 cm. Luas wilayah terdampak diperkirakan mencapai 1.250 hektar.",
         "jumlah_jiwa": 3240,
         "jumlah_keluarga": 815,
@@ -189,9 +189,9 @@ INTENT_PRIORITY = [
 
     # ─── TIER 4: Detail Program Statis ───────────────────────────────
     ("ask_disaster_detail", [
-        r"\b(banjir\s+demak)\b",
+        r"\b(banjir\s+jawa\s+barat)\b",
         r"(detail|info).*banjir",
-        r"tentang.*banjir.*demak",
+        r"tentang.*banjir.*jawa\s+barat",
     ]),
     ("ask_education_detail", [
         r"(program|bantuan|detail|info).*(pendidikan|beasiswa|sekolah)",
@@ -256,6 +256,14 @@ INTENT_PRIORITY = [
     ]),
 
     # ─── TIER 7: Prosedur Platform ───────────────────────────────────
+    ("ask_direct_donate", [
+        r"saya mau (ber|be)?donasi langsung",
+        r"mau (ber|be)?donasi langsung",
+        r"saya mau (ber|be)?donasi",
+        r"ingin (ber|be)?donasi",
+        r"pengen (ber|be)?donasi",
+        r"mau (ber|be)?donasi",
+    ]),
     ("ask_how_to_donate", [
         r"(cara|gimana|bagaimana|langkah|step|panduan).*(donasi|bayar|sumbang|transfer|bantu|berdonasi)",
         r"(donasi|bayar|sumbang|transfer|berdonasi).*(cara|gimana|bagaimana|langkah|panduan)",
@@ -377,7 +385,7 @@ def detect_context(history: list) -> str:
     if not history: return None
     for msg in reversed(history[-5:]):
         text = msg.get("content", "").lower() if isinstance(msg, dict) else str(msg).lower()
-        if "banjir demak" in text: return "banjir_demak"
+        if "banjir jawa barat" in text: return "banjir_jawa_barat"
         if "pendidikan" in text or "beasiswa" in text: return "pendidikan"
         if "kesehatan" in text or "pengobatan" in text: return "kesehatan"
         if "penghijauan" in text or "lingkungan" in text or "pohon" in text: return "lingkungan"
@@ -386,7 +394,7 @@ def detect_context(history: list) -> str:
 def _get_active_program_data(context: str, default_intent: str):
     prog_id = context
     if not prog_id:
-        if default_intent == "ask_disaster_detail": prog_id = "banjir_demak"
+        if default_intent == "ask_disaster_detail": prog_id = "banjir_jawa_barat"
         elif default_intent == "ask_education_detail": prog_id = "pendidikan"
         elif default_intent == "ask_health_detail": prog_id = "kesehatan"
         elif default_intent == "ask_environment_detail": prog_id = "lingkungan"
@@ -488,17 +496,47 @@ def _build_campaign_response(kategori: str, intro: str) -> str:
     response += "Kunjungi halaman **Donasi Sekarang** untuk mulai membantu! 💛"
     return response
 
+HUMANIZED_STORIES = {
+    1: (
+        "👩‍🏫 **Kondisi di Lapangan:**\n"
+        "Saat ini ada ratusan anak cerdas di pelosok yang terancam putus sekolah. "
+        "Tim kami (Kak Nisa & Kak Budi) mendampingi mereka setiap minggu, memastikan seragam, SPP, dan alat tulis terpenuhi. "
+        "Bantuan Kakak adalah tiket masa depan mereka untuk terus bermimpi."
+    ),
+    2: (
+        "🆘 **Update Evakuasi Bencana:**\n"
+        "Sekitar 400 keluarga masih bertahan di posko pengungsian dengan kondisi kedinginan. "
+        "Tim relawan yang dikomandoi Pak Ridwan sedang bekerja siang-malam memasak di dapur umum dan menyalurkan pakaian kering serta obat-obatan. "
+        "Mereka sangat membutuhkan uluran tangan kita secepatnya!"
+    ),
+    3: (
+        "🌳 **Gerakan Penyelamatan Lahan:**\n"
+        "Kondisi hulu sungai semakin rawan longsor. Bersama Mang Udin (tokoh masyarakat) dan 50 relawan lokal, "
+        "kami sedang menanam pohon produktif yang kelak selain menahan longsor, buahnya bisa dijual untuk menghidupi ekonomi desa. "
+        "Ini adalah tabungan amal jariyah yang terus mengalir."
+    ),
+    4: (
+        "🏡 **Kisah Panti Asuhan:**\n"
+        "Panti Asuhan ini menjadi rumah bagi 45 anak yatim piatu. Mereka diasuh dengan penuh kasih sayang oleh Bunda Rina dibantu 3 pengasuh sukarela yang menemani mereka belajar dan bermain. "
+        "Saat ini, mereka sedang kesulitan memenuhi kebutuhan sembako bulanan dan atap asrama yang bocor. Bantuan Kakak akan membuat mereka merasa tidak sendirian di dunia ini. ❤️"
+    )
+}
+
 def _build_all_campaigns_response() -> str:
     campaigns = get_all_campaigns()
     if not campaigns:
         return "Maaf, belum ada program kampanye yang tersedia saat ini."
     
-    response = "Berikut adalah **daftar seluruh program donasi** yang ada di DonasiCare saat ini: 📋\n\n"
-    for i, c in enumerate(campaigns, 1):
+    response = "Berdasarkan seluruh data di DonasiCare, ini yang bisa saya sampaikan:\n\n"
+    
+    for c in campaigns:
         progress = min(int((c['dana_terkumpul'] / c['target_dana']) * 100), 100) if c['target_dana'] > 0 else 0
-        response += f"**{i}. {c['judul']}** ({c['kategori']})\n"
-        response += f"   Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n"
-    response += "Anda bisa mengeklik tombol **Donasi Sekarang** di sebelah kiri untuk mulai membantu! 💛"
+        story = HUMANIZED_STORIES.get(c['id'], c['deskripsi'])
+        response += f"📌 **{c['judul']}** ({c['kategori']})\n\n"
+        response += f"{story}\n\n"
+        response += f"📍 Lokasi: {c.get('lokasi', 'Indonesia')} 💰 Terkumpul: {format_rupiah(c['dana_terkumpul'])} dari {format_rupiah(c['target_dana'])} ({progress}%)\n\n"
+        response += "💡 _Jika hati Kakak tergerak, klik 'Donasi Sekarang' di menu sebelah kiri ya!_\n\n"
+        
     return response
 
 # ── Smart Response Generator ──────────────────────────────────────────
@@ -788,7 +826,7 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
 
     # 1. Program Introduction Intents (Statis - Program 1)
     if intent == "ask_disaster_detail":
-        p = DETAILED_PROGRAMS["banjir_demak"]
+        p = DETAILED_PROGRAMS["banjir_jawa_barat"]
         return f"📍 **{p['judul']}**\n\n{p['deskripsi']}\n\n📅 Tanggal kejadian:\n{p['tanggal_kejadian']}\n\n⏰ Waktu awal kejadian:\n{p['waktu_kejadian']}\n\nSaat ini proses evakuasi dan distribusi bantuan masih terus dilakukan."
     
     elif intent == "ask_education_detail":
@@ -889,6 +927,9 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
             f"Setiap orang yang berdonasi turut menciptakan perubahan nyata. "
             f"Bergabunglah dan jadilah bagian dari gerakan kebaikan ini!"
         )
+        
+    elif intent == "ask_direct_donate":
+        return "Tentu, Kak! Silakan isi form donasi langsung di bawah ini ya: 👇"
         
     elif intent == "ask_how_to_donate":
         return _build_donation_guide()
@@ -998,37 +1039,11 @@ def generate_smart_response(text: str, history: list = None, chat_history: list 
 
     # 5. Fallback jika pertanyaannya spesifik butuh konteks (Program 1)
     if intent in ["ask_date_time", "ask_location", "ask_victim_count", "ask_needs", "ask_impact_100k", "ask_impact_500k"]:
-        return "Program mana yang Kakak maksud? (Contoh: Banjir Demak, Pendidikan, Kesehatan, atau Lingkungan)"
+        return "Program mana yang Kakak maksud? (Contoh: Banjir Jawa Barat, Pendidikan, Kesehatan, atau Lingkungan)"
 
     # 6. Smart Knowledge Base Retrieval (RAG Simulation)
     campaigns = get_all_campaigns()
     prompt_lower = text.lower()
-    
-    HUMANIZED_STORIES = {
-        1: (
-            "👩‍🏫 **Kondisi di Lapangan:**\n"
-            "Saat ini ada ratusan anak cerdas di pelosok yang terancam putus sekolah. "
-            "Tim kami (Kak Nisa & Kak Budi) mendampingi mereka setiap minggu, memastikan seragam, SPP, dan alat tulis terpenuhi. "
-            "Bantuan Kakak adalah tiket masa depan mereka untuk terus bermimpi."
-        ),
-        2: (
-            "🆘 **Update Evakuasi Bencana:**\n"
-            "Sekitar 400 keluarga masih bertahan di posko pengungsian dengan kondisi kedinginan. "
-            "Tim relawan yang dikomandoi Pak Ridwan sedang bekerja siang-malam memasak di dapur umum dan menyalurkan pakaian kering serta obat-obatan. "
-            "Mereka sangat membutuhkan uluran tangan kita secepatnya!"
-        ),
-        3: (
-            "🌳 **Gerakan Penyelamatan Lahan:**\n"
-            "Kondisi hulu sungai semakin rawan longsor. Bersama Mang Udin (tokoh masyarakat) dan 50 relawan lokal, "
-            "kami sedang menanam pohon produktif yang kelak selain menahan longsor, buahnya bisa dijual untuk menghidupi ekonomi desa. "
-            "Ini adalah tabungan amal jariyah yang terus mengalir."
-        ),
-        4: (
-            "🏡 **Kisah Panti Asuhan:**\n"
-            "Panti Asuhan ini menjadi rumah bagi 45 anak yatim piatu. Mereka diasuh dengan penuh kasih sayang oleh Bunda Rina dibantu 3 pengasuh sukarela yang menemani mereka belajar dan bermain. "
-            "Saat ini, mereka sedang kesulitan memenuhi kebutuhan sembako bulanan dan atap asrama yang bocor. Bantuan Kakak akan membuat mereka merasa tidak sendirian di dunia ini. ❤️"
-        )
-    }
     
     knowledge_base = []
     

@@ -463,7 +463,7 @@ def tab_chatbot():
                 with st.chat_message("assistant", avatar="🤖"):
                     try:
                         intent = classify_intent(user_input)
-                        show_form = (intent == "ask_how_to_donate")
+                        show_form = (intent == "ask_direct_donate")
 
                         # Kirim seluruh history untuk memory context
                         resp = generate_smart_response(user_input, st.session_state.messages)
@@ -496,14 +496,14 @@ def tab_chatbot():
         if c1.button("📊 Dana terkumpul", use_container_width=True, key="qr1"):
             st.session_state.quick_prompt = "Berapa total dana yang sudah terkumpul?"
             st.rerun()
-        if c2.button("🎓 Pendidikan", use_container_width=True, key="qr2"):
-            st.session_state.quick_prompt = "Program pendidikan apa saja yang ada?"
+        if c2.button("💖 Donasi", use_container_width=True, key="qr2"):
+            st.session_state.quick_prompt = "Saya mau donasi"
             st.rerun()
         if c3.button("🤝 Jadi relawan", use_container_width=True, key="qr3"):
             st.session_state.quick_prompt = "Bagaimana cara menjadi volunteer?"
             st.rerun()
-        if c4.button("🌿 Lingkungan", use_container_width=True, key="qr4"):
-            st.session_state.quick_prompt = "Program lingkungan apa yang ada?"
+        if c4.button("🌟 Dampak donasi", use_container_width=True, key="qr4"):
+            st.session_state.quick_prompt = "Apa dampak donasi saya sebesar Rp 50.000?"
             st.rerun()
         with c5:
             if st.button("🗑️", use_container_width=True, key="qr_clear", help="Hapus semua percakapan"):
